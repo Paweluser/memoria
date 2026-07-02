@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --main-color: #ffffff;
+  --second-color: #171717;
+  --accent-color: #b89b5e;
+  --error-color: #ef4444;
+  --role-bg: #dcfce7;
+  --role-text: #15803d;
+}
+
+body {
+  background-color: var(--main-color);
+  color: var(--second-color);
+}
