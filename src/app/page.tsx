@@ -17,8 +17,10 @@ export default function Home() {
           Aplikacja do zarządzania zakładem pogrzebowym
         </h2>
       </div>
-      <div className="mt-8">
+      <div className="flex flex-col gap-3 md:gap-4 mt-8">
         <AppLink href="/login">Zaloguj się</AppLink>
+        <p className="">Nie posiadasz konta?</p>
+				<AppLink href="/register">Załóż konto</AppLink>
       </div>
     </main>
   );

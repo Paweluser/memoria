@@ -1,13 +1,10 @@
-import { LoginForm } from "../components/LoginForm";
+import { AuthWrapper } from "../components/AuthWrapper";
+import { LoginForm } from "../components/Form/LoginForm";
 
-export default function loginPage() {
+export default function LoginPage() {
   return (
-    <div className="m-auto flex flex-col items-center justify-center">
-      <h2 className="mb-2 font-(family-name:--julius) text-3xl font-bold uppercase md:mb-4 md:text-5xl">
-        Logowanie
-      </h2>
-      <p className="md:text-xl">Zaloguj się do systemu Memoria</p>
+    <AuthWrapper title="Logowanie" description="Zaloguj się do systemu Memoria">
       <LoginForm />
-    </div>
+    </AuthWrapper>
   );
 }
