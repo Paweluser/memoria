@@ -1,9 +1,15 @@
+"use client";
+
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
+import { useFormState } from "react-dom";
+import { signup } from "@/actions/authActions";
 
 export function RegisterForm() {
+  const [formState, formAction] = useFormState(signup, {});
+
   return (
-    <form action="" className="mt-8 flex w-full flex-col space-y-6">
+    <form action={formAction} className="mt-8 flex w-full flex-col space-y-6">
       <Input label="Imię:" inputAttribute="firstName" type="text" />
       <Input label="Nazwisko:" inputAttribute="lastName" type="text" />
       <Input label="E-mail:" inputAttribute="email" />
