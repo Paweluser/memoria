@@ -2,11 +2,11 @@
 
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { signup } from "@/actions/authActions";
 
 export function RegisterForm() {
-  const [formState, formAction] = useFormState(signup, {});
+const [state, formAction] = useActionState(signup, {})
 
   return (
     <form action={formAction} className="mt-8 flex w-full flex-col space-y-6">

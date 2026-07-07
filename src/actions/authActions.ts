@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { employees } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function signup(prevState: any, formData: FormData) {
   const firstName = formData.get("firstName") as string;
@@ -9,7 +10,7 @@ export async function signup(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  let errors = {};
+  const errors: Record<string, string> = {};
 
   if (!firstName || firstName.trim() === "") errors.firstName = "Imię jest wymagane.";
   if (!lastName || lastName.trim() === "") errors.lastName = "Nazwisko jest wymagane.";
