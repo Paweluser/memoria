@@ -8,7 +8,7 @@ const robotoSans = Roboto({
   variable: "--roboto",
   subsets: ["latin-ext"],
 });
-
+  
 const juliusSansOne = Julius_Sans_One({
   weight: "400",
   variable: "--julius",
