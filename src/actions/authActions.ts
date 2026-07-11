@@ -8,11 +8,13 @@ import { SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const secretKey = new TextEncoder().encode(
-  process.env.JWT_SECRET
-)
+if (!process.env.JWT_SECRET) {
+  throw new Error("Brak zmiennej jwt!");
+}
 
-export async function signup(prevState: any, formData: FormData) {
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
+
+export async function signup(prevState: unknown, formData: FormData) {
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
   const email = formData.get("email") as string;
@@ -51,7 +53,7 @@ export async function signup(prevState: any, formData: FormData) {
       password: hashedPassword,
     });
 
-  } catch (error) {
+  } catch {
     return {
       errors: { general: "Wystąpił błąd podczas zapisywania." },
     };
@@ -59,7 +61,7 @@ export async function signup(prevState: any, formData: FormData) {
   redirect('/dashboard');
 }
 
-export async function login(prevState: any, formData: FormData) {
+export async function login(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -92,6 +94,16 @@ export async function login(prevState: any, formData: FormData) {
       .setExpirationTime('7d')
       .sign(secretKey)
 
-    
+    const cookieStore = await cookies();
+    cookieStore.set('session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: expiresAt,
+      sameSite: "lax",
+      path: "/"
+    });
+  } catch {
+    return { errors: { general: "Wystąpił błąd podczas logowania." } }
   }
+  redirect('/dashboard');
 }
