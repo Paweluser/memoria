@@ -1,33 +1,31 @@
-import { jwtVerify } from 'jose';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { decrypt } from "./db/lib/session";
 
-if (!process.env.JWT_SECRET) {
-    throw new Error("Brak zmiennej jwt!");
-}
-
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
+const protectedRoutes = ["/dashboard"];
+const publicRoutes = ["/login", "/register", "/"]; 
 
 export async function proxy(request: NextRequest) {
-    const path = request.nextUrl.pathname;
+  const path = request.nextUrl.pathname;
+  
+  const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
+  const isPublicRoute = publicRoutes.includes(path);
 
-    const isProtectedRoute = path.startsWith("/dashboard");
+  const sessionCookie = request.cookies.get("session")?.value;
+  const session = await decrypt(sessionCookie);
 
-    if (!isProtectedRoute) {
-        return NextResponse.next();
-    }
+  if (isProtectedRoute && !session?.userId) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
-    const sessionCookie = request.cookies.get("session")?.value;
+  if (
+    isPublicRoute &&
+    session?.userId &&
+    !path.startsWith("/dashboard")
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
 
-    if (!sessionCookie) {
-        return NextResponse.redirect(new URL("/login", request.url))
-    }
-
-    try {
-        await jwtVerify(sessionCookie, secretKey);
-        return NextResponse.next();
-    } catch {
-        return NextResponse.redirect(new URL("/login", request.url))
-    }
+  return NextResponse.next();
 }
 
 export const config = {

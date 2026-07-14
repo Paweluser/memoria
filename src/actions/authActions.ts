@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db";
+import { createSession, deleteSession } from "@/db/lib/session";
 import { employees } from "@/db/schema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -9,10 +10,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 if (!process.env.JWT_SECRET) {
-  throw new Error("Brak zmiennej jwt!");
+    throw new Error("Brak zmiennej jwt!");
 }
 
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
+const secretKey = process.env.JWT_SECRET
+const encodedKey = new TextEncoder().encode(secretKey)
 
 export async function signup(prevState: unknown, formData: FormData) {
   const firstName = formData.get("firstName") as string;
@@ -46,12 +48,23 @@ export async function signup(prevState: unknown, formData: FormData) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.insert(employees).values({
+    const [newUser] = await db.insert(employees).values({
       firstName,
       lastName,
       email,
       password: hashedPassword,
+    }).returning({ 
+      id: employees.id, 
+      role: employees.role 
     });
+
+    if (!newUser) {
+      return {
+        errors: { general: "Wystąpił błąd podczas tworzenia konta." },
+      };
+    }
+
+    await createSession(newUser.id, newUser.role);
 
   } catch {
     return {
@@ -92,7 +105,7 @@ export async function login(prevState: unknown, formData: FormData) {
     }).setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime('7d')
-      .sign(secretKey)
+      .sign(encodedKey)
 
     const cookieStore = await cookies();
     cookieStore.set('session', token, {
@@ -106,4 +119,9 @@ export async function login(prevState: unknown, formData: FormData) {
     return { errors: { general: "Wystąpił błąd podczas logowania." } }
   }
   redirect('/dashboard');
+}
+
+export async function logout() {
+  await deleteSession();
+  redirect('/login');
 }
