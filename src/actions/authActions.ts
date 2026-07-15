@@ -1,20 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { createSession, deleteSession } from "@/db/lib/session";
+import { createSession, deleteSession } from "@/db/session";
 import { employees } from "@/db/schema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { SignJWT } from "jose";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-if (!process.env.JWT_SECRET) {
-    throw new Error("Brak zmiennej jwt!");
-}
-
-const secretKey = process.env.JWT_SECRET
-const encodedKey = new TextEncoder().encode(secretKey)
 
 export async function signup(prevState: unknown, formData: FormData) {
   const firstName = formData.get("firstName") as string;
@@ -53,9 +44,9 @@ export async function signup(prevState: unknown, formData: FormData) {
       lastName,
       email,
       password: hashedPassword,
-    }).returning({ 
-      id: employees.id, 
-      role: employees.role 
+    }).returning({
+      id: employees.id,
+      role: employees.role
     });
 
     if (!newUser) {
@@ -97,24 +88,8 @@ export async function login(prevState: unknown, formData: FormData) {
       return { errors: { general: "Błędny adres e-mail lub hasło" } }
     }
 
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-    const token = await new SignJWT({
-      userId: user.id,
-      role: user.role
-    }).setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime('7d')
-      .sign(encodedKey)
-
-    const cookieStore = await cookies();
-    cookieStore.set('session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: expiresAt,
-      sameSite: "lax",
-      path: "/"
-    });
+    await createSession(user.id, user.role);
+    
   } catch {
     return { errors: { general: "Wystąpił błąd podczas logowania." } }
   }

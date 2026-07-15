@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decrypt } from "./db/lib/session";
+import { decrypt } from "./db/session";
 
 const protectedRoutes = ["/dashboard"];
-const publicRoutes = ["/login", "/register", "/"]; 
+const publicRoutes = ["/login", "/register", "/"];
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  
+
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
   const isPublicRoute = publicRoutes.includes(path);
 
