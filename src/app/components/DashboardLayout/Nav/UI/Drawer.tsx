@@ -1,3 +1,15 @@
-export function Drawer() {
-    return <div className="fixed z-50 md:hidden top-0 left-0 bg-(--main-color) w-full"></div>
+type DrawerProps = {
+  isOpen: boolean;
+};
+
+export function Drawer({ isOpen }: DrawerProps) {
+  return (
+    <div
+      className={`fixed top-20 right-0 z-50 h-full w-full transition-transform duration-300 md:hidden ${
+        isOpen ? "translate-x-0" : "translate-x-full"
+      }`}
+    >
+      
+    </div>
+  );
 }

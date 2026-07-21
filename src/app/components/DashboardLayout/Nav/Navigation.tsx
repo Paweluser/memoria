@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Flame } from "lucide-react";
 import { BurgerBtn } from "./UI/BurgerBtn";
@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Drawer } from "./UI/Drawer";
 
 export function Navigation() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   return (
     <nav className="relative top-0 flex justify-between border-b-2 p-3">
@@ -18,8 +18,8 @@ export function Navigation() {
         </span>
         A
       </h1>
-      <BurgerBtn onClick={() => setIsDrawerOpen(true)} />
-      {isDrawerOpen && <Drawer />}
+      <BurgerBtn onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
+      <Drawer isOpen={isDrawerOpen} />
     </nav>
   );
 }
