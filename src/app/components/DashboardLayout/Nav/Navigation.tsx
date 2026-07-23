@@ -18,8 +18,11 @@ export function Navigation() {
         </span>
         A
       </h1>
-      <BurgerBtn onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
-      <Drawer isOpen={isDrawerOpen} />
+      <BurgerBtn
+        isOpen={isDrawerOpen}
+        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+      />
+      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </nav>
   );
 }
