@@ -14,7 +14,7 @@ export function Navigation() {
         MEMOR
         <span className="relative inline-block">
           I
-          <Flame className="absolute -top-6 left-1/2 size-6 translate-x-[-60%] text-(--accent-color) md:-top-8 md:size-9" />
+          <Flame className="absolute -top-6 left-1/2 size-6 translate-x-[-60%] text-(--accent-color)" />
         </span>
         A
       </h1>

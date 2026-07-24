@@ -7,7 +7,7 @@ type NavLinkProps = {
   href: string;
   label: string;
   Icon: LucideIcon;
-  onClick: () => void;
+  onClick?: () => void;
 };
 
 export default function NavLink({ href, label, Icon, onClick }: NavLinkProps) {
@@ -17,7 +17,7 @@ export default function NavLink({ href, label, Icon, onClick }: NavLinkProps) {
     <Link
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-lg px-4 py-2 transition-colors duration-300 ${
+      className={`flex items-center gap-3 rounded-lg px-4 py-2 transition-colors duration-300 md:my-1 ${
         isActive
           ? "bg-(--second-color) text-(--main-color)"
           : "hover:text-(--accent-color)"

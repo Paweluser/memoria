@@ -1,9 +1,11 @@
+"use client";
+
 import { NavLinks } from "@/constants/NavLinks";
 import NavLink from "./NavLink";
 
-export function NavLinkList({ onClick }: { onClick: () => void }) {
+export function NavLinkList({ onClick }: { onClick?: () => void }) {
   return (
-    <ul className="space-y-6 p-3">
+    <ul className="space-y-6 p-3 md:space-y-7 lg:p-4">
       {NavLinks.map((group) => (
         <li key={group.title}>
           <p className="mb-2 px-2 font-bold uppercase">{group.title}</p>
