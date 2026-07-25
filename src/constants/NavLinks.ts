@@ -1,4 +1,4 @@
-import { BarChart2, BookOpen, Briefcase, FileText, Home, PlusCircle, Settings, Users, UsersRound } from "lucide-react"
+import { BarChart2, BookOpen, FileText, Home, Settings, Truck, User, UsersRound } from "lucide-react"
 
 export const NavLinks = [
     {
@@ -9,22 +9,17 @@ export const NavLinks = [
         title: 'Ceremonia',
         links: [
             {
-                label: 'Dodaj pogrzeb',
-                href: '/dashboard/funerals/new',
-                icon: PlusCircle,
-            },
-            { label: 'Dodaj przewóz', href: '/dashboard/transports', icon: Briefcase },
-            {
-                label: 'Historia',
-                href: '/dashboard/funerals/history',
+                label: 'Pogrzeby',
+                href: '/dashboard/funerals',
                 icon: BookOpen,
             },
+            { label: 'Przewozy', href: '/dashboard/transports', icon: Truck },
         ],
     },
     {
         title: 'Personel',
         links: [
-            { label: 'Pracownicy', href: '/dashboard/employees', icon: Users },
+            { label: 'Pracownicy', href: '/dashboard/employees', icon: User },
             { label: 'Zespoły', href: '/dashboard/teams', icon: UsersRound },
         ],
     },

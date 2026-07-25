@@ -1,4 +1,10 @@
-export default async function DashboardPage() {
+import PageHeader from "../components/DashboardLayout/PageHeader";
 
-    return <div className=""></div>
+export default async function DashboardPage() {
+  return (
+    <PageHeader
+      title="Panel główny"
+      description="Zbiór najważniejszych informacji dotyczącej działalności"
+    />
+  );
 }
