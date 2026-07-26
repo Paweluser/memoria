@@ -13,11 +13,12 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="mt-8 flex w-full flex-col space-y-6">
-      <Input label="E-mail:" inputAttribute="email" autoComplete="email" />
+      <Input label="E-mail:" inputAttribute="email" autoComplete="email" required />
       <Input
         label="Hasło:"
         inputAttribute="password"
         autoComplete="current-password"
+        required
       />
       {state.errors?.general && <FormError>{state.errors.general}</FormError>}
       <SubmitBtn>Zaloguj się</SubmitBtn>
