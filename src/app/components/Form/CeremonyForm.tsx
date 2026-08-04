@@ -1,15 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { AppBtn } from "../AppBtn";
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
 import { burialTypeEnum } from "@/db/validations/ceremoniesSchema";
 
-export function CeremonyForm() {
-  // [state, formState] = useActionState()
+type CeremonyFormProps = {
+  onNext: (data: FormData) => void;
+  onPrev: () => void;
+};
 
+export function CeremonyForm({ onNext, onPrev }: CeremonyFormProps) {
   return (
-    <form className="mt-8 flex w-full flex-col space-y-6" action="">
+    <form
+      className="mt-8 flex w-full flex-col space-y-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onNext(new FormData(e.currentTarget));
+      }}
+    >
       <h2 className="border-b pb-2 text-xl">Krok 3: Dane ceremonii</h2>
       <Input
         label="Miasto"
@@ -54,8 +63,9 @@ export function CeremonyForm() {
         </select>
       </div>
 
-      <div className="flex justify-end pt-4">
-        <SubmitBtn>Dalej</SubmitBtn>
+      <div className="flex justify-between pt-4">
+        <AppBtn onClick={onPrev}>Wstecz</AppBtn>
+        <SubmitBtn>Wyślij</SubmitBtn>
       </div>
     </form>
   );

@@ -1,13 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
+import { AppBtn } from "../AppBtn";
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
 
-export function ClientForm() {
-  // [state, formState] = useActionState()
+type ClientFormProps = {
+  onNext: (data: FormData) => void;
+  onPrev: () => void;
+};
+
+export function ClientForm({ onNext, onPrev }: ClientFormProps) {
   return (
-    <form className="mt-8 flex w-full flex-col space-y-6" action="">
+    <form
+      className="mt-8 flex w-full flex-col space-y-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onNext(new FormData(e.currentTarget));
+      }}
+    >
       <h2 className="border-b pb-2 text-xl">Krok 2: Dane Zleceniodawcy</h2>
       <Input label="Imię" inputAttribute="firstName" maxLength={50} required />
       <Input
@@ -56,7 +66,8 @@ export function ClientForm() {
         maxLength={255}
       />
 
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <AppBtn onClick={onPrev}>Wstecz</AppBtn>
         <SubmitBtn>Dalej</SubmitBtn>
       </div>
     </form>

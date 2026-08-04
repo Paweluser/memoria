@@ -1,11 +1,11 @@
 import PageHeader from "@/app/components/DashboardLayout/PageHeader";
-import { ClientForm } from "@/app/components/Form/ClientForm";
+import { FuneralWizard } from "@/app/components/FuneralWizard";
 
 export default function NewFuneralPage() {
   return (
     <>
       <PageHeader title="Nowy pogrzeb" />
-      <ClientForm />
+      <FuneralWizard />
     </>
   );
 }

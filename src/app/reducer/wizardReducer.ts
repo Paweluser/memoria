@@ -9,6 +9,13 @@ export type WizardAction =
     | { type: "next_step"; payload: { stepName: "deceasedData" | "clientData" | "ceremonyData"; data: unknown } }
     | { type: "prev_step" }
 
+export const initialState: WizardState = {
+    currentStep: 1,
+    deceasedData: null,
+    clientData: null,
+    ceremonyData: null
+}
+
 export function wizardReducer(state: WizardState, action: WizardAction) {
     switch (action.type) {
         case "next_step": {
