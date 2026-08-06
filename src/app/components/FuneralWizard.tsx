@@ -5,6 +5,7 @@ import { initialState, wizardReducer } from "../reducer/wizardReducer";
 import { DeceasedForm } from "./Form/DeceasedForm";
 import { ClientForm } from "./Form/ClientForm";
 import { CeremonyForm } from "./Form/CeremonyForm";
+import { CeremonyData, ClientData, DeceasedData } from "@/types/funeralsTypes";
 
 export function FuneralWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
@@ -13,7 +14,8 @@ export function FuneralWizard() {
     <>
       {state.currentStep === 1 && (
         <DeceasedForm
-          onNext={(data) =>
+          savedData={state.deceasedData}
+          onNext={(data: DeceasedData) =>
             dispatch({
               type: "next_step",
               payload: { stepName: "deceasedData", data },
@@ -24,7 +26,8 @@ export function FuneralWizard() {
 
       {state.currentStep === 2 && (
         <ClientForm
-          onNext={(data) =>
+          savedData={state.clientData}
+          onNext={(data: ClientData) =>
             dispatch({
               type: "next_step",
               payload: { stepName: "clientData", data },
@@ -36,7 +39,8 @@ export function FuneralWizard() {
 
       {state.currentStep === 3 && (
         <CeremonyForm
-          onNext={(data) => {
+          savedData={state.ceremonyData}
+          onNext={(data: CeremonyData) => {
             dispatch({
               type: "next_step",
               payload: { stepName: "ceremonyData", data },
