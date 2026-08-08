@@ -1,22 +1,30 @@
 "use client";
 
+import { CeremonyData } from "@/types/funeralsTypes";
 import { AppBtn } from "../AppBtn";
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
 import { burialTypeEnum } from "@/db/validations/ceremoniesSchema";
 
 type CeremonyFormProps = {
-  onNext: (data: FormData) => void;
+  onNext: (data: CeremonyData) => void;
   onPrev: () => void;
+  savedData?: CeremonyData | null;
 };
 
-export function CeremonyForm({ onNext, onPrev }: CeremonyFormProps) {
+export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
   return (
     <form
       className="mt-8 flex w-full flex-col space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        onNext(new FormData(e.currentTarget));
+
+        const formData = new FormData(e.currentTarget);
+        const dataObject = Object.fromEntries(
+          formData.entries(),
+        ) as CeremonyData;
+
+        onNext(dataObject);
       }}
     >
       <h2 className="border-b pb-2 text-xl">Krok 3: Dane ceremonii</h2>
@@ -26,21 +34,34 @@ export function CeremonyForm({ onNext, onPrev }: CeremonyFormProps) {
         type="text"
         maxLength={100}
         required
+        defaultValue={savedData?.city}
       />
       <Input
         label="Data ceremonii"
         inputAttribute="funeralDate"
         type="date"
         required
+        defaultValue={savedData?.funeralDate}
       />
 
       <Input
         label="Godzina ceremonii"
         inputAttribute="funeralTime"
         type="time"
+        defaultValue={savedData?.funeralTime}
       />
-      <Input label="Wprowadzenie" inputAttribute="bringingInTime" type="time" />
-      <Input label="Pożegnanie" inputAttribute="gatheringTime" type="time" />
+      <Input
+        label="Wprowadzenie"
+        inputAttribute="bringingInTime"
+        type="time"
+        defaultValue={savedData?.bringingInTime}
+      />
+      <Input
+        label="Pożegnanie"
+        inputAttribute="gatheringTime"
+        type="time"
+        defaultValue={savedData?.gatheringTime}
+      />
 
       <div className="space-y-2">
         <label htmlFor="burialType" className="block text-sm">
@@ -51,6 +72,7 @@ export function CeremonyForm({ onNext, onPrev }: CeremonyFormProps) {
           name="burialType"
           className="w-full rounded-lg border px-4 py-3"
           required
+          defaultValue={savedData?.burialType}
         >
           <option value="" disabled>
             Wybierz opcję...

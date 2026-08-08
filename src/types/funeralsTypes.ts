@@ -4,7 +4,7 @@ export type DeceasedData = {
   pesel: string;
   birthDate: string;
   deathDate: string;
-  insured?: string; 
+  insured?: boolean; 
 }
 
 export type ClientData = {
