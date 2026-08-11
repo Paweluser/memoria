@@ -1,10 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { CeremonyData } from "@/types/funeralsTypes";
 import { AppBtn } from "../AppBtn";
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
-import { burialTypeEnum } from "@/db/validations/ceremoniesSchema";
+import { FormError } from "./UI/FormError";
+import {
+  burialTypeEnum,
+  ceremoniesSchema,
+} from "@/db/validations/ceremoniesSchema";
+import z from "zod";
 
 type CeremonyFormProps = {
   onNext: (data: CeremonyData) => void;
@@ -12,7 +18,13 @@ type CeremonyFormProps = {
   savedData?: CeremonyData | null;
 };
 
+type FieldErrors = z.inferFlattenedErrors<
+  typeof ceremoniesSchema
+>["fieldErrors"];
+
 export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
+  const [errors, setErrors] = useState<FieldErrors>({});
+
   return (
     <form
       className="mt-8 flex w-full flex-col space-y-6"
@@ -20,29 +32,36 @@ export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
         e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
-        const dataObject = Object.fromEntries(
-          formData.entries(),
-        ) as CeremonyData;
+        const dataObject = Object.fromEntries(formData.entries());
 
-        onNext(dataObject);
+        const validatedFields = ceremoniesSchema.safeParse(dataObject);
+
+        if (!validatedFields.success) {
+          setErrors(validatedFields.error.flatten().fieldErrors);
+          return;
+        }
+
+        setErrors({});
+        onNext(validatedFields.data as CeremonyData);
       }}
     >
       <h2 className="border-b pb-2 text-xl">Krok 3: Dane ceremonii</h2>
+
       <Input
         label="Miasto"
         inputAttribute="city"
         type="text"
-        maxLength={100}
-        required
         defaultValue={savedData?.city}
       />
+      {errors.city && <FormError>{errors.city[0]}</FormError>}
+
       <Input
         label="Data ceremonii"
         inputAttribute="funeralDate"
         type="date"
-        required
         defaultValue={savedData?.funeralDate}
       />
+      {errors.funeralDate && <FormError>{errors.funeralDate[0]}</FormError>}
 
       <Input
         label="Godzina ceremonii"
@@ -50,18 +69,25 @@ export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
         type="time"
         defaultValue={savedData?.funeralTime}
       />
+      {errors.funeralTime && <FormError>{errors.funeralTime[0]}</FormError>}
+
       <Input
         label="Wprowadzenie"
         inputAttribute="bringingInTime"
         type="time"
         defaultValue={savedData?.bringingInTime}
       />
+      {errors.bringingInTime && (
+        <FormError>{errors.bringingInTime[0]}</FormError>
+      )}
+
       <Input
         label="Pożegnanie"
         inputAttribute="gatheringTime"
         type="time"
         defaultValue={savedData?.gatheringTime}
       />
+      {errors.gatheringTime && <FormError>{errors.gatheringTime[0]}</FormError>}
 
       <div className="space-y-2">
         <label htmlFor="burialType" className="block text-sm">
@@ -71,8 +97,7 @@ export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
           id="burialType"
           name="burialType"
           className="w-full rounded-lg border px-4 py-3"
-          required
-          defaultValue={savedData?.burialType}
+          defaultValue={savedData?.burialType || ""}
         >
           <option value="" disabled>
             Wybierz opcję...
@@ -83,6 +108,7 @@ export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
             </option>
           ))}
         </select>
+        {errors.burialType && <FormError>{errors.burialType[0]}</FormError>}
       </div>
 
       <div className="flex justify-between pt-4">
