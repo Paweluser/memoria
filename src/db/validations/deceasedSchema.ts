@@ -6,7 +6,8 @@ export const deceasedSchema = z.object({
   pesel: z.string().length(11, "PESEL musi składać się dokładnie z 11 znaków"),
   birthDate: z.string().min(1, "Data urodzenia jest wymagana"),
   deathDate: z.string().min(1, "Data śmierci jest wymagana"),
-  insured: z.string()
+  insured: z
+    .union([z.string(), z.boolean()])
     .optional()
-    .transform((val) => val === "true"), 
+    .transform((val) => val === "true" || val === true),
 });

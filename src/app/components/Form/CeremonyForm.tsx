@@ -16,13 +16,19 @@ type CeremonyFormProps = {
   onNext: (data: CeremonyData) => void;
   onPrev: () => void;
   savedData?: CeremonyData | null;
+  isPending?: boolean;
 };
 
 type FieldErrors = z.inferFlattenedErrors<
   typeof ceremoniesSchema
 >["fieldErrors"];
 
-export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
+export function CeremonyForm({
+  onNext,
+  onPrev,
+  savedData,
+  isPending,
+}: CeremonyFormProps) {
   const [errors, setErrors] = useState<FieldErrors>({});
 
   return (
@@ -113,7 +119,7 @@ export function CeremonyForm({ onNext, onPrev, savedData }: CeremonyFormProps) {
 
       <div className="flex justify-between pt-4">
         <AppBtn onClick={onPrev}>Wstecz</AppBtn>
-        <SubmitBtn>Wyślij</SubmitBtn>
+        <SubmitBtn isPending={isPending}>Wyślij</SubmitBtn>
       </div>
     </form>
   );

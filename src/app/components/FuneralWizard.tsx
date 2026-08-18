@@ -1,14 +1,18 @@
 "use client";
 
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { initialState, wizardReducer } from "../reducer/wizardReducer";
 import { DeceasedForm } from "./Form/DeceasedForm";
 import { ClientForm } from "./Form/ClientForm";
 import { CeremonyForm } from "./Form/CeremonyForm";
 import { CeremonyData, ClientData, DeceasedData } from "@/types/funeralsTypes";
+import { useRouter } from "next/navigation";
+import { createFuneralAction } from "@/actions/funeralActions";
 
 export function FuneralWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -40,15 +44,40 @@ export function FuneralWizard() {
       {state.currentStep === 3 && (
         <CeremonyForm
           savedData={state.ceremonyData}
-          onNext={(data: CeremonyData) => {
+          isPending={isLoading}
+          onPrev={() => dispatch({ type: "prev_step" })}
+          onNext={async (data: CeremonyData) => {
             dispatch({
               type: "next_step",
               payload: { stepName: "ceremonyData", data },
             });
+
+            const payload = {
+              deceased: state.deceasedData,
+              client: state.clientData,
+              ceremony: data,
+            };
+
+            setIsLoading(true);
+
+            try {
+              const result = await createFuneralAction(payload);
+              
+              if (result.success) {
+                alert(result.message);
+                router.push("/dashboard/funerals"); 
+              } else {
+                alert(result.error);
+              }
+            } catch (error) {
+              console.error(error);
+              alert("Wystąpił nieoczekiwany błąd.");
+            } finally {
+              setIsLoading(false);
+            }
           }}
-          onPrev={() => dispatch({ type: "prev_step" })}
         />
       )}
     </>
-  )
+  );
 }
