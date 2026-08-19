@@ -1,7 +1,11 @@
 import { AppLink } from "@/app/components/AppLink";
 import PageHeader from "@/app/components/DashboardLayout/PageHeader";
+import { CeremonyTable } from "@/app/components/Tables/CeremonyTable";
+import { getCeremonies } from "@/db/queries/ceremony";
 
-export default function FuneralsPage() {
+export default async function FuneralsPage() {
+  const ceremonies = await getCeremonies();
+
   return (
     <>
       <PageHeader
@@ -11,6 +15,7 @@ export default function FuneralsPage() {
       <div className="flex justify-center">
         <AppLink href="/dashboard/funerals/new">Dodaj</AppLink>
       </div>
+      <CeremonyTable data={ceremonies} />
     </>
   );
 }

@@ -7,6 +7,8 @@
   --error-color: #ef4444;
   --role-bg: #dcfce7;
   --role-text: #15803d;
+  --table-border: #e5e7eb;
+  --table-header-bg: #f9fafb;
 }
 
 body {

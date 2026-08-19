@@ -12,7 +12,7 @@ export default function DashboardLayout({
       <Navigation />
       <div className="flex">
         <Sidebar />
-        <main className="w-full flex-1 flex justify-center p-4 md:p-8">
+        <main className="w-full min-w-0 flex-1 flex justify-center p-4 md:p-8">
           <div className="w-full max-w-7xl">{children}</div>
         </main>
       </div>
