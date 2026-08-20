@@ -1,4 +1,10 @@
-export function CeremonyTable({ data }) {
+import { CeremonyTableData } from "@/types/funeralsTypes";
+
+type CeremonyTableProps = {
+  data: CeremonyTableData;
+}
+
+export function CeremonyTable({ data }: CeremonyTableProps) {
   return (
     <div className="mt-8 overflow-x-auto rounded-lg border border-(--table-border) shadow-sm">
       <table className="min-w-full text-left text-sm whitespace-nowrap lg:text-base">
@@ -22,10 +28,10 @@ export function CeremonyTable({ data }) {
               className="border-b border-(--table-border) last:border-0 [&>td]:px-4 [&>td]:py-3"
             >
               <td>
-                {ceremony.client.firstName} {ceremony.client.lastName}
+                {ceremony.client?.firstName} {ceremony.client?.lastName}
               </td>
               <td>
-                {ceremony.deceased.firstName} {ceremony.deceased.lastName}
+                {ceremony.deceased?.firstName} {ceremony.deceased?.lastName}
               </td>
               <td>{ceremony.team?.teamName || "Brak zespołu"}</td>
               <td>{ceremony.city}</td>

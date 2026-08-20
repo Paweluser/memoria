@@ -28,3 +28,12 @@ export type CeremonyData = {
   burialType: "Trumna" | "Urna" | ""; 
   notes?: string;
 }
+
+export interface CeremonyTableItem extends CeremonyData {
+  id: number;
+  client: (ClientData & { id: number }) | null;
+  deceased: (DeceasedData & { id: number }) | null;
+  team: { id: number; teamName: string } | null;
+}
+
+export type CeremonyTableData = CeremonyTableItem[];
