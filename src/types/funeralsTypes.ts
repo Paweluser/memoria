@@ -4,29 +4,29 @@ export type DeceasedData = {
   pesel: string;
   birthDate: string;
   deathDate: string;
-  insured?: boolean; 
+  insured?: boolean | null; 
 }
 
 export type ClientData = {
   firstName: string;
   lastName: string;
   phone: string;
-  street?: string;
-  houseNumber?: string;
-  zipCode?: string;
-  city?: string;
-  nip?: string;
-  companyName?: string;
+  street?: string | null;
+  houseNumber?: string | null;
+  zipCode?: string | null;
+  city?: string | null;
+  nip?: string | null;
+  companyName?: string | null;
 }
 
 export type CeremonyData = {
   city: string;
   funeralDate: string;
-  funeralTime?: string;
-  bringingInTime?: string;
-  gatheringTime?: string;
-  burialType: "Trumna" | "Urna" | ""; 
-  notes?: string;
+  funeralTime?: string | null;
+  bringingInTime?: string | null;
+  gatheringTime?: string | null;
+  burialType: string; 
+  notes?: string | null;
 }
 
 export interface CeremonyTableItem extends CeremonyData {
