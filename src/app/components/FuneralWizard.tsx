@@ -8,6 +8,7 @@ import { CeremonyForm } from "./Form/CeremonyForm";
 import { CeremonyData, ClientData, DeceasedData } from "@/types/funeralsTypes";
 import { useRouter } from "next/navigation";
 import { createFuneralAction } from "@/actions/funeralActions";
+import { ProgressBar } from "./Form/UI/ProgressBar";
 
 export function FuneralWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
@@ -16,6 +17,7 @@ export function FuneralWizard() {
 
   return (
     <>
+      <ProgressBar step={state.currentStep} />
       {state.currentStep === 1 && (
         <DeceasedForm
           savedData={state.deceasedData}
