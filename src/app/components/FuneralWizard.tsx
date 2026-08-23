@@ -9,15 +9,33 @@ import { CeremonyData, ClientData, DeceasedData } from "@/types/funeralsTypes";
 import { useRouter } from "next/navigation";
 import { createFuneralAction } from "@/actions/funeralActions";
 import { ProgressBar } from "./Form/UI/ProgressBar";
+import { Modal } from "./Modal";
 
 export function FuneralWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    type: "success" | "error";
+    message: string;
+  }>({
+    isOpen: false,
+    type: "success",
+    message: "",
+  });
   const router = useRouter();
+
+  const handleCloseModal = () => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+    if (modal.type === "success") {
+      router.push("/dashboard/funerals?page=1");
+    }
+  };
 
   return (
     <>
       <ProgressBar step={state.currentStep} />
+
       {state.currentStep === 1 && (
         <DeceasedForm
           savedData={state.deceasedData}
@@ -64,20 +82,39 @@ export function FuneralWizard() {
 
             try {
               const result = await createFuneralAction(payload);
-              
+
               if (result.success) {
-                alert(result.message);
-                router.push("/dashboard/funerals"); 
+                setModal({
+                  isOpen: true,
+                  type: "success",
+                  message: result.message || "Pomyślnie dodano pogrzeb.",
+                });
               } else {
-                alert(result.error);
+                setModal({
+                  isOpen: true,
+                  type: "error",
+                  message: result.error || "Wystąpił błąd.",
+                });
               }
             } catch (error) {
               console.error(error);
-              alert("Wystąpił nieoczekiwany błąd.");
+              setModal({
+                isOpen: true,
+                type: "error",
+                message: "Wystąpił nieoczekiwany błąd po stronie serwera.",
+              });
             } finally {
               setIsLoading(false);
             }
           }}
+        />
+      )}
+
+      {modal.isOpen && (
+        <Modal
+          type={modal.type}
+          message={modal.message}
+          onClose={handleCloseModal}
         />
       )}
     </>
