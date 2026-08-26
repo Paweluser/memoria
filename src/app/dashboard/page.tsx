@@ -1,4 +1,5 @@
-import PageHeader from "../components/DashboardLayout/PageHeader";
+import { PageHeader } from "../components/DashboardLayout/PageHeader";
+
 
 export default async function DashboardPage() {
   return (

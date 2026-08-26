@@ -3,7 +3,7 @@ type PageHeaderProps = {
 	description?: string;
 };
 
-export default function PageHeader({ title, description }: PageHeaderProps) {
+export function PageHeader({ title, description }: PageHeaderProps) {
 	return (
 		<header className="mb-8 text-center">
 			<h2 className="text-2xl md:text-3xl font-(family-name:--julius) font-bold uppercase tracking-wider">

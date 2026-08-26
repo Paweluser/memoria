@@ -1,5 +1,5 @@
 import { AppLink } from "@/app/components/AppLink";
-import PageHeader from "@/app/components/DashboardLayout/PageHeader";
+import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { Pagination } from "@/app/components/Pagination";
 import { CeremonyTable } from "@/app/components/Tables/CeremonyTable";
 import { getCeremonies } from "@/db/queries/ceremony";

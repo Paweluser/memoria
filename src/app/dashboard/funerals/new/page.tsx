@@ -1,4 +1,5 @@
-import PageHeader from "@/app/components/DashboardLayout/PageHeader";
+
+import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { FuneralWizard } from "@/app/components/FuneralWizard";
 
 export default function NewFuneralPage() {
