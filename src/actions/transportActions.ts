@@ -3,10 +3,10 @@
 import { db } from "@/db"; 
 import { transportOrders } from "@/db/schema";
 import { transportSchema } from "@/db/validations/transportSchema"; 
+import { redirect } from "next/navigation"; 
 
-type TransportFormState = {
+export type TransportFormState = {
   success?: boolean;
-  message?: string;
   error?: string;
   fieldErrors?: Record<string, string[]>;
 };
@@ -29,12 +29,6 @@ export async function createTransportAction(
 
   try {
     await db.insert(transportOrders).values(validatedFields.data);
-
-    return { 
-      success: true, 
-      message: "Pomyślnie dodano zlecenie transportu!" 
-    };
-
   } catch (error) {
     console.error("Błąd podczas zapisu transportu:", error);
     return { 
@@ -42,4 +36,5 @@ export async function createTransportAction(
       error: "Wystąpił błąd serwera podczas zapisu do bazy danych." 
     };
   }
+  redirect("/dashboard/transports"); 
 }
