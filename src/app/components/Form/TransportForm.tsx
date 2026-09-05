@@ -5,22 +5,16 @@ import { SimpleEmployee } from "@/types/employeeTypes";
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
 import { FormError } from "./UI/FormError";
-import {
-  createTransportAction,
-  type TransportFormState,
-} from "@/actions/transportActions";
+import { createTransportAction } from "@/actions/transportActions";
 
 type TransportFormProps = {
   employees: SimpleEmployee[];
 };
 
-const initialState: TransportFormState = {};
-
 export function TransportForm({ employees }: TransportFormProps) {
-  const [state, formAction] = useActionState(
-    createTransportAction,
-    initialState,
-  );
+  const [state, formAction] = useActionState(createTransportAction, {
+    errors: { general: "" },
+  });
 
   return (
     <>
@@ -32,8 +26,8 @@ export function TransportForm({ employees }: TransportFormProps) {
           inputAttribute="transportFrom"
           type="text"
         />
-        {state?.fieldErrors?.transportFrom && (
-          <FormError>{state.fieldErrors.transportFrom}</FormError>
+        {state?.errors?.transportFrom && (
+          <FormError>{state.errors.transportFrom}</FormError>
         )}
 
         <Input
@@ -41,8 +35,8 @@ export function TransportForm({ employees }: TransportFormProps) {
           inputAttribute="transportTo"
           type="text"
         />
-        {state?.fieldErrors?.transportTo && (
-          <FormError>{state.fieldErrors.transportTo}</FormError>
+        {state?.errors?.transportTo && (
+          <FormError>{state.errors.transportTo}</FormError>
         )}
 
         <Input
@@ -50,8 +44,8 @@ export function TransportForm({ employees }: TransportFormProps) {
           inputAttribute="clientPhoneNumber"
           type="tel"
         />
-        {state?.fieldErrors?.clientPhoneNumber && (
-          <FormError>{state.fieldErrors.clientPhoneNumber}</FormError>
+        {state?.errors?.clientPhoneNumber && (
+          <FormError>{state.errors.clientPhoneNumber}</FormError>
         )}
 
         <div className="flex flex-col">
@@ -70,8 +64,8 @@ export function TransportForm({ employees }: TransportFormProps) {
               </option>
             ))}
           </select>
-          {state?.fieldErrors?.managerId && (
-            <FormError>{state.fieldErrors.managerId}</FormError>
+          {state?.errors?.managerId && (
+            <FormError>{state.errors.managerId}</FormError>
           )}
         </div>
 
@@ -91,8 +85,8 @@ export function TransportForm({ employees }: TransportFormProps) {
               </option>
             ))}
           </select>
-          {state?.fieldErrors?.employeeId && (
-            <FormError>{state.fieldErrors.employeeId}</FormError>
+          {state?.errors?.employeeId && (
+            <FormError>{state.errors.employeeId}</FormError>
           )}
         </div>
 
