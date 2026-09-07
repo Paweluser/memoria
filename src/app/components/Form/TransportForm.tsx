@@ -13,7 +13,7 @@ type TransportFormProps = {
 
 export function TransportForm({ employees }: TransportFormProps) {
   const [state, formAction] = useActionState(createTransportAction, {
-    errors: { general: "" },
+    errors: {},
   });
 
   return (
