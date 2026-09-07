@@ -1,5 +1,5 @@
 import { db } from "./index";
-import { migrate } from "drizzle-orm/neon-http/migrator";
+import { migrate } from "drizzle-orm/neon-serverless/migrator";
 
 const main = async () => {
   try {
@@ -10,6 +10,8 @@ const main = async () => {
   } catch (err) {
     console.error(`Error during migration: ${err}`);
     process.exit(1);
+  } finally {
+    process.exit(0);
   }
 };
 
