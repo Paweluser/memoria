@@ -2,7 +2,7 @@ import { CeremonyTableData } from "@/types/funeralsTypes";
 
 type CeremonyTableProps = {
   data: CeremonyTableData;
-}
+};
 
 export function CeremonyTable({ data }: CeremonyTableProps) {
   return (
@@ -28,10 +28,14 @@ export function CeremonyTable({ data }: CeremonyTableProps) {
               className="border-b border-(--table-border) last:border-0 [&>td]:px-4 [&>td]:py-3"
             >
               <td>
-                {ceremony.client?.firstName} {ceremony.client?.lastName}
+                {ceremony.client
+                  ? `${ceremony.client.firstName} ${ceremony.client.lastName}`
+                  : "Brak"}
               </td>
               <td>
-                {ceremony.deceased?.firstName} {ceremony.deceased?.lastName}
+                {ceremony.deceased
+                  ? `${ceremony.deceased.firstName} ${ceremony.deceased.lastName}`
+                  : "Brak"}
               </td>
               <td>{ceremony.team?.teamName || "Brak zespołu"}</td>
               <td>{ceremony.city}</td>
