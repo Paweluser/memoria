@@ -10,8 +10,8 @@ export function TeamTable({ data }: TeamTableProps) {
       <table className="min-w-full text-left text-sm whitespace-nowrap lg:text-base">
         <thead className="border-b border-(--table-border) bg-(--table-header-bg)">
           <tr className="[&>th]:px-4 [&>th]:py-3">
-            <th scope="col">Nazwa zespołu</th>
-            <th scope="col">Liczba pracowników</th>
+            <th className="px-3 py-2">Nazwa zespołu</th>
+            <th className="px-3 py-2">Liczba pracowników</th>
           </tr>
         </thead>
 
