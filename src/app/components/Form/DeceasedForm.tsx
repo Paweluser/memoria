@@ -77,7 +77,7 @@ export function DeceasedForm({ onNext, savedData }: DeceasedFormProps) {
           id="insured"
           name="insured"
           value="true"
-          defaultChecked={savedData?.insured}
+          defaultChecked={savedData?.insured ?? false}
         />
         <label htmlFor="insured">Osoba ubezpieczona</label>
       </div>

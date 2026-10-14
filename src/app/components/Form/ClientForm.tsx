@@ -69,7 +69,7 @@ export function ClientForm({ onNext, onPrev, savedData }: ClientFormProps) {
         label="Ulica"
         inputAttribute="street"
         type="text"
-        defaultValue={savedData?.street}
+        defaultValue={savedData?.street ?? ""}
       />
       {errors.street && <FormError>{errors.street[0]}</FormError>}
 
@@ -77,7 +77,7 @@ export function ClientForm({ onNext, onPrev, savedData }: ClientFormProps) {
         label="Numer domu"
         inputAttribute="houseNumber"
         type="text"
-        defaultValue={savedData?.houseNumber}
+        defaultValue={savedData?.houseNumber ?? ""}
       />
       {errors.houseNumber && <FormError>{errors.houseNumber[0]}</FormError>}
 
@@ -85,7 +85,7 @@ export function ClientForm({ onNext, onPrev, savedData }: ClientFormProps) {
         label="Kod pocztowy"
         inputAttribute="zipCode"
         type="text"
-        defaultValue={savedData?.zipCode}
+        defaultValue={savedData?.zipCode ?? ""}
       />
       {errors.zipCode && <FormError>{errors.zipCode[0]}</FormError>}
 
@@ -93,7 +93,7 @@ export function ClientForm({ onNext, onPrev, savedData }: ClientFormProps) {
         label="Miasto"
         inputAttribute="city"
         type="text"
-        defaultValue={savedData?.city}
+        defaultValue={savedData?.city ?? ""}
       />
       {errors.city && <FormError>{errors.city[0]}</FormError>}
 
@@ -101,7 +101,7 @@ export function ClientForm({ onNext, onPrev, savedData }: ClientFormProps) {
         label="Numer NIP"
         inputAttribute="nip"
         type="text"
-        defaultValue={savedData?.nip}
+        defaultValue={savedData?.nip ?? ""}
       />
       {errors.nip && <FormError>{errors.nip[0]}</FormError>}
 
@@ -109,7 +109,7 @@ export function ClientForm({ onNext, onPrev, savedData }: ClientFormProps) {
         label="Nazwa firmy"
         inputAttribute="companyName"
         type="text"
-        defaultValue={savedData?.companyName}
+        defaultValue={savedData?.companyName ?? ""}
       />
       {errors.companyName && <FormError>{errors.companyName[0]}</FormError>}
 

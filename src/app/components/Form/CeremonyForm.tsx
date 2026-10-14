@@ -73,7 +73,7 @@ export function CeremonyForm({
         label="Godzina ceremonii"
         inputAttribute="funeralTime"
         type="time"
-        defaultValue={savedData?.funeralTime}
+        defaultValue={savedData?.funeralTime ?? ""}
       />
       {errors.funeralTime && <FormError>{errors.funeralTime[0]}</FormError>}
 
@@ -81,7 +81,7 @@ export function CeremonyForm({
         label="Wprowadzenie"
         inputAttribute="bringingInTime"
         type="time"
-        defaultValue={savedData?.bringingInTime}
+        defaultValue={savedData?.bringingInTime ?? ""}
       />
       {errors.bringingInTime && (
         <FormError>{errors.bringingInTime[0]}</FormError>
@@ -91,7 +91,7 @@ export function CeremonyForm({
         label="Pożegnanie"
         inputAttribute="gatheringTime"
         type="time"
-        defaultValue={savedData?.gatheringTime}
+        defaultValue={savedData?.gatheringTime ?? ""}
       />
       {errors.gatheringTime && <FormError>{errors.gatheringTime[0]}</FormError>}
 
