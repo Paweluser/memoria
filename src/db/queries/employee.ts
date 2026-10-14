@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { employees } from "../schema";
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 export async function getEmployeeList() {
     return await db.select({
@@ -31,4 +31,14 @@ export async function getEmployees(page = 1, pageSize = 10) {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return { data, totalPages };
+}
+
+export async function getEmployeeAccessById(id: number) {
+  return db.query.employees.findFirst({
+    where: eq(employees.id, id),
+    columns: {
+      id: true,
+      role: true,
+    },
+  });
 }

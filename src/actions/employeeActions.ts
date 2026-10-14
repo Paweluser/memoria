@@ -6,6 +6,8 @@ import { employeeSchema } from "@/db/validations/employeeSchema";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { requireUser } from "@/db/session";
+import { getEmployeeAccessById } from "@/db/queries/employee";
 import z from "zod";
 
 type EmployeeFormState = {
@@ -16,26 +18,48 @@ type EmployeeFormState = {
 
 export async function createEmployeeAction(
   prevState: EmployeeFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<EmployeeFormState> {
-  const rawData = Object.fromEntries(formData.entries());
-  const validatedFields = employeeSchema.safeParse(rawData);
-
-  if (!validatedFields.success) {
-    return { errors: validatedFields.error.flatten().fieldErrors };
-  }
-
-  const { firstName, lastName, email, password, role } = validatedFields.data;
-
-  const existingUser = await db.query.employees.findFirst({
-    where: eq(employees.email, email),
-  });
-
-  if (existingUser) {
-    return { errors: { email: ["Konto z tym adresem e-mail już istnieje."] } };
-  }
+  const session = await requireUser();
 
   try {
+  const currentUser = await getEmployeeAccessById(session.userId);
+
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    return {
+      errors: {
+        general: ["Nie masz uprawnień do dodawania pracowników."],
+      },
+    };
+  }
+
+    const rawData = Object.fromEntries(formData.entries());
+    const validatedFields = employeeSchema.safeParse(rawData);
+
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+      };
+    }
+
+    const { firstName, lastName, email, password, role } =
+      validatedFields.data;
+
+    const existingUser = await db.query.employees.findFirst({
+      where: eq(employees.email, email),
+      columns: {
+        id: true,
+      },
+    });
+
+    if (existingUser) {
+      return {
+        errors: {
+          email: ["Konto z tym adresem e-mail już istnieje."],
+        },
+      };
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.insert(employees).values({
@@ -47,8 +71,11 @@ export async function createEmployeeAction(
     });
   } catch (error) {
     console.error("Błąd podczas dodawania pracownika:", error);
+
     return {
-      errors: { general: ["Wystąpił błąd serwera podczas zapisywania."] },
+      errors: {
+        general: ["Wystąpił błąd serwera podczas zapisywania."],
+      },
     };
   }
 
