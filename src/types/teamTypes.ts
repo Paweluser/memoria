@@ -5,3 +5,5 @@ export type TeamTableItem = {
 };
 
 export type TeamTableData = TeamTableItem[];
+
+export type SimpleTeam = Pick<TeamTableItem, "id" | "teamName">;

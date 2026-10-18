@@ -8,6 +8,8 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/db/session";
 import { getEmployeeAccessById } from "@/db/queries/employee";
+import { getTeamById } from "@/db/queries/team";
+import { revalidatePath } from "next/cache";
 import z from "zod";
 
 type EmployeeFormState = {
@@ -23,15 +25,15 @@ export async function createEmployeeAction(
   const session = await requireUser();
 
   try {
-  const currentUser = await getEmployeeAccessById(session.userId);
+    const currentUser = await getEmployeeAccessById(session.userId);
 
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    return {
-      errors: {
-        general: ["Nie masz uprawnień do dodawania pracowników."],
-      },
-    };
-  }
+    if (!currentUser || currentUser.role !== "ADMIN") {
+      return {
+        errors: {
+          general: ["Nie masz uprawnień do dodawania pracowników."],
+        },
+      };
+    }
 
     const rawData = Object.fromEntries(formData.entries());
     const validatedFields = employeeSchema.safeParse(rawData);
@@ -42,8 +44,16 @@ export async function createEmployeeAction(
       };
     }
 
-    const { firstName, lastName, email, password, role } =
+    const { firstName, lastName, email, password, role, teamId } =
       validatedFields.data;
+
+    if (teamId !== null && !(await getTeamById(teamId))) {
+      return {
+        errors: {
+          teamId: ["Wybrany zespół już nie istnieje. Wybierz inny zespół."],
+        },
+      };
+    }
 
     const existingUser = await db.query.employees.findFirst({
       where: eq(employees.email, email),
@@ -68,6 +78,7 @@ export async function createEmployeeAction(
       email,
       password: hashedPassword,
       role,
+      teamId,
     });
   } catch (error) {
     console.error("Błąd podczas dodawania pracownika:", error);
@@ -79,5 +90,7 @@ export async function createEmployeeAction(
     };
   }
 
+  revalidatePath("/dashboard/employees");
+  revalidatePath("/dashboard/teams");
   redirect("/dashboard/employees");
 }

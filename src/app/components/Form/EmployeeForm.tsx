@@ -5,8 +5,13 @@ import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
 import { FormError } from "./UI/FormError";
 import { createEmployeeAction } from "@/actions/employeeActions";
+import { SimpleTeam } from "@/types/teamTypes";
 
-export function EmployeeForm() {
+type EmployeeFormProps = {
+  teams: SimpleTeam[];
+};
+
+export function EmployeeForm({ teams }: EmployeeFormProps) {
   const [state, formAction] = useActionState(createEmployeeAction, {
     errors: {},
   });
@@ -52,6 +57,32 @@ export function EmployeeForm() {
           <option value="ADMIN">Administrator</option>
         </select>
         {state?.errors?.role && <FormError>{state.errors.role[0]}</FormError>}
+      </div>
+
+      <div className="flex flex-col">
+        <label htmlFor="teamId" className="mb-1 text-sm font-medium">
+          Zespół
+        </label>
+        <select
+          name="teamId"
+          id="teamId"
+          className="rounded-md border p-2 text-sm shadow-sm focus:border-(--second-color) focus:ring-1 focus:ring-(--second-color) focus:outline-none"
+        >
+          <option value="">Bez zespołu</option>
+          {teams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.teamName}
+            </option>
+          ))}
+        </select>
+        {state?.errors?.teamId && (
+          <FormError>{state.errors.teamId[0]}</FormError>
+        )}
+        {teams.length === 0 && (
+          <p className="mt-2 text-sm">
+            Nie ma jeszcze zespołów. Możesz dodać pracownika bez zespołu.
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end pt-4">

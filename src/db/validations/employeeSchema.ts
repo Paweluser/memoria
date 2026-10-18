@@ -1,6 +1,18 @@
 import { z } from "zod";
 
 export const employeeSchema = z.object({
+  teamId: z.preprocess(
+    (value) => {
+      if (value === "" || value == null) return null;
+      return typeof value === "string" ? Number(value) : value;
+    },
+    z
+      .number({ error: "Wybierz poprawny zespół." })
+      .int("Wybierz poprawny zespół.")
+      .positive("Wybierz poprawny zespół.")
+      .nullable(),
+  ),
+
   firstName: z
     .string()
     .trim()

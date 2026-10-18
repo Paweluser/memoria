@@ -1,6 +1,23 @@
-import { count } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
+
+export async function getTeamList() {
+  return db
+    .select({ id: teams.id, teamName: teams.teamName })
+    .from(teams)
+    .orderBy(asc(teams.teamName), asc(teams.id));
+}
+
+export async function getTeamById(id: number) {
+  return db.query.teams.findFirst({
+    where: eq(teams.id, id),
+    columns: {
+      id: true,
+      teamName: true,
+    },
+  });
+}
 
 export async function getTeamsTableData(page = 1, pageSize = 10) {
   const offset = (page - 1) * pageSize;
