@@ -21,6 +21,10 @@ export function TransportForm({ employees }: TransportFormProps) {
       <form action={formAction} className="mt-8 flex w-full flex-col space-y-6">
         <h2 className="border-b pb-2 text-xl">Nowe zlecenie transportu</h2>
 
+        {state?.errors?.general && (
+          <FormError>{state.errors.general[0]}</FormError>
+        )}
+
         <Input
           label="Miejsce odbioru"
           inputAttribute="transportFrom"

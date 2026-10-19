@@ -3,6 +3,8 @@
 import { db } from "@/db";
 import { transportOrders } from "@/db/schema";
 import { transportSchema } from "@/db/validations/transportSchema";
+import { requireUser } from "@/db/session";
+import { getEmployeeAccessById } from "@/db/queries/employee";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -14,20 +16,39 @@ type TransportFormState = {
 
 export async function createTransportAction(
   prevState: TransportFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<TransportFormState> {
-  const rawData = Object.fromEntries(formData.entries());
-  const validatedFields = transportSchema.safeParse(rawData);
-
-  if (!validatedFields.success) {
-    return { errors: validatedFields.error.flatten().fieldErrors };
-  }
+  const session = await requireUser();
 
   try {
+    const currentUser = await getEmployeeAccessById(session.userId);
+
+    if (
+      !currentUser ||
+      (currentUser.role !== "ADMIN" && currentUser.role !== "MANAGER")
+    ) {
+      return {
+        errors: {
+          general: ["Nie masz uprawnień do dodawania przewozów."],
+        },
+      };
+    }
+
+    const rawData = Object.fromEntries(formData.entries());
+    const validatedFields = transportSchema.safeParse(rawData);
+
+    if (!validatedFields.success) {
+      return { errors: validatedFields.error.flatten().fieldErrors };
+    }
+
     await db.insert(transportOrders).values(validatedFields.data);
   } catch (error) {
-    console.error("Błąd bazy danych:", error);
-    return { errors: { general: ["Wystąpił błąd podczas zapisywania transportu."] } };
+    console.error("Błąd podczas dodawania przewozu:", error);
+    return {
+      errors: {
+        general: ["Wystąpił błąd podczas zapisywania transportu."],
+      },
+    };
   }
 
   redirect("/dashboard/transports");
