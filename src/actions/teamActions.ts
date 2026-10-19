@@ -3,6 +3,8 @@
 import { db } from "@/db";
 import { teams } from "@/db/schema";
 import { teamSchema } from "@/db/validations/teamSchema";
+import { requireUser } from "@/db/session";
+import { getEmployeeAccessById } from "@/db/queries/employee";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -16,16 +18,28 @@ export async function createTeamAction(
     prevState: TeamFormState,
     formData: FormData,
 ): Promise<TeamFormState> {
-    const rawData = Object.fromEntries(formData.entries());
-    const validatedFields = teamSchema.safeParse(rawData);
-
-    if (!validatedFields.success) {
-        return { errors: validatedFields.error.flatten().fieldErrors };
-    }
-
-    const { teamName } = validatedFields.data;
+    const session = await requireUser();
 
     try {
+        const currentUser = await getEmployeeAccessById(session.userId);
+
+        if (!currentUser || currentUser.role !== "ADMIN") {
+            return {
+                errors: {
+                    general: ["Nie masz uprawnień do dodawania zespołów."],
+                },
+            };
+        }
+
+        const rawData = Object.fromEntries(formData.entries());
+        const validatedFields = teamSchema.safeParse(rawData);
+
+        if (!validatedFields.success) {
+            return { errors: validatedFields.error.flatten().fieldErrors };
+        }
+
+        const { teamName } = validatedFields.data;
+
         await db.insert(teams).values({
             teamName,
         });
