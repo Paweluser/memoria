@@ -6,6 +6,8 @@ import { clients, deceased, ceremonies } from "@/db/schema";
 import { clientsSchema } from "@/db/validations/clientsSchema";
 import { deceasedSchema } from "@/db/validations/deceasedSchema";
 import { ceremoniesSchema } from "@/db/validations/ceremoniesSchema";
+import { requireUser } from "@/db/session";
+import { getEmployeeAccessById } from "@/db/queries/employee";
 
 const createFuneralSchema = z.object({
   client: clientsSchema,
@@ -14,19 +16,32 @@ const createFuneralSchema = z.object({
 });
 
 export async function createFuneralAction(data: unknown) {
-  const validatedFields = createFuneralSchema.safeParse(data);
-
-  if (!validatedFields.success) {
-    console.error("Validate error:", validatedFields.error.flatten());
-    return {
-      success: false,
-      error: "Wprowadzono nieprawidłowe dane.",
-    };
-  }
-
-  const { client, deceased: deceasedData, ceremony } = validatedFields.data;
+  const session = await requireUser();
 
   try {
+    const currentUser = await getEmployeeAccessById(session.userId);
+
+    if (
+      !currentUser ||
+      (currentUser.role !== "ADMIN" && currentUser.role !== "MANAGER")
+    ) {
+      return {
+        success: false,
+        error: "Nie masz uprawnień do dodawania pogrzebów.",
+      };
+    }
+
+    const validatedFields = createFuneralSchema.safeParse(data);
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        error: "Wprowadzono nieprawidłowe dane.",
+      };
+    }
+
+    const { client, deceased: deceasedData, ceremony } = validatedFields.data;
+
     await db.transaction(async (tx) => {
       const [insertedDeceased] = await tx
         .insert(deceased)
