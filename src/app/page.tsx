@@ -17,10 +17,11 @@ export default function Home() {
           Aplikacja do zarządzania zakładem pogrzebowym
         </h2>
       </div>
-      <div className="flex flex-col gap-3 md:gap-4 mt-8">
+      <div className="mt-8 flex flex-col items-center gap-3 md:gap-4">
         <AppLink href="/login">Zaloguj się</AppLink>
-        <p className="">Nie posiadasz konta?</p>
-				<AppLink href="/register">Załóż konto</AppLink>
+        <p className="text-sm text-center p-2">
+          Nie masz konta? Skontaktuj się z administratorem zakładu.
+        </p>
       </div>
     </main>
   );
