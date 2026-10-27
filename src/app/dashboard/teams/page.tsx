@@ -3,6 +3,8 @@ import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { Pagination } from "@/app/components/Pagination";
 import { TeamTable } from "@/app/components/Tables/TeamTable";
 import { getTeamsTableData } from "@/db/queries/team";
+import { requireUser } from "@/db/session";
+import { hasRole } from "@/db/permissions";
 
 type TeamsPageProps = {
   searchParams: Promise<{ page?: string }>;
@@ -11,6 +13,9 @@ type TeamsPageProps = {
 export default async function TeamsPage({
   searchParams,
 }: TeamsPageProps) {
+  const session = await requireUser();
+  const canCreateTeam = await hasRole(session.userId, ["ADMIN"]);
+
   const { page } = await searchParams;
   const parsedPage = Number(page);
 
@@ -28,9 +33,11 @@ export default async function TeamsPage({
         description="Lista zespołów oraz możliwość dodawania nowych."
       />
 
-      <div className="flex justify-center">
-        <AppLink href="/dashboard/teams/new">Dodaj</AppLink>
-      </div>
+      {canCreateTeam && (
+        <div className="flex justify-center">
+          <AppLink href="/dashboard/teams/new">Dodaj</AppLink>
+        </div>
+      )}
 
       <TeamTable data={data} />
 
