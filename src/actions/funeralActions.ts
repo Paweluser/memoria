@@ -7,7 +7,7 @@ import { clientsSchema } from "@/db/validations/clientsSchema";
 import { deceasedSchema } from "@/db/validations/deceasedSchema";
 import { ceremoniesSchema } from "@/db/validations/ceremoniesSchema";
 import { requireUser } from "@/db/session";
-import { getEmployeeAccessById } from "@/db/queries/employee";
+import { hasRole } from "@/db/permissions";
 
 const createFuneralSchema = z.object({
   client: clientsSchema,
@@ -19,12 +19,9 @@ export async function createFuneralAction(data: unknown) {
   const session = await requireUser();
 
   try {
-    const currentUser = await getEmployeeAccessById(session.userId);
+    const canCreateFuneral = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
 
-    if (
-      !currentUser ||
-      (currentUser.role !== "ADMIN" && currentUser.role !== "MANAGER")
-    ) {
+    if (!canCreateFuneral) {
       return {
         success: false,
         error: "Nie masz uprawnień do dodawania pogrzebów.",

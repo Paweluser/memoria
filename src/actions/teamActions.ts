@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { teams } from "@/db/schema";
 import { teamSchema } from "@/db/validations/teamSchema";
 import { requireUser } from "@/db/session";
-import { getEmployeeAccessById } from "@/db/queries/employee";
+import { hasRole } from "@/db/permissions";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -21,9 +21,9 @@ export async function createTeamAction(
     const session = await requireUser();
 
     try {
-        const currentUser = await getEmployeeAccessById(session.userId);
+        const canCreateTeam = await hasRole(session.userId, ["ADMIN"]);
 
-        if (!currentUser || currentUser.role !== "ADMIN") {
+        if (!canCreateTeam) {
             return {
                 errors: {
                     general: ["Nie masz uprawnień do dodawania zespołów."],

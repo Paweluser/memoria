@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { transportOrders } from "@/db/schema";
 import { transportSchema } from "@/db/validations/transportSchema";
 import { requireUser } from "@/db/session";
-import { getEmployeeAccessById } from "@/db/queries/employee";
+import { hasRole } from "@/db/permissions";
 import { redirect } from "next/navigation";
 import z from "zod";
 
@@ -21,12 +21,9 @@ export async function createTransportAction(
   const session = await requireUser();
 
   try {
-    const currentUser = await getEmployeeAccessById(session.userId);
+    const canCreateTransport = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
 
-    if (
-      !currentUser ||
-      (currentUser.role !== "ADMIN" && currentUser.role !== "MANAGER")
-    ) {
+    if (!canCreateTransport) {
       return {
         errors: {
           general: ["Nie masz uprawnień do dodawania przewozów."],

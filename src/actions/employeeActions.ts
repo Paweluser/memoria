@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/db/session";
-import { getEmployeeAccessById } from "@/db/queries/employee";
+import { hasRole } from "@/db/permissions";
 import { getTeamById } from "@/db/queries/team";
 import { revalidatePath } from "next/cache";
 import z from "zod";
@@ -25,9 +25,9 @@ export async function createEmployeeAction(
   const session = await requireUser();
 
   try {
-    const currentUser = await getEmployeeAccessById(session.userId);
+    const canCreateEmployee = await hasRole(session.userId, ["ADMIN"]);
 
-    if (!currentUser || currentUser.role !== "ADMIN") {
+    if (!canCreateEmployee) {
       return {
         errors: {
           general: ["Nie masz uprawnień do dodawania pracowników."],
