@@ -1,6 +1,6 @@
 import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { EmployeeForm } from "@/app/components/Form/EmployeeForm";
-import { AppLink } from "@/app/components/AppLink";
+import { AccessDenied } from "@/app/components/AccessDenied";
 import { getTeamList } from "@/db/queries/team";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
@@ -11,17 +11,11 @@ export default async function NewEmployeePage() {
 
   if (!canCreateEmployee) {
     return (
-      <>
-        <PageHeader title="Brak dostępu" />
-
-        <p className="mb-4">
-          Nie masz uprawnień do dodawania pracowników.
-        </p>
-
-        <AppLink href="/dashboard/employees">
-          Wróć do listy pracowników
-        </AppLink>
-      </>
+      <AccessDenied
+        message="Nie masz uprawnień do dodawania pracowników."
+        backHref="/dashboard/employees"
+        backLabel="Wróć do listy pracowników"
+      />
     );
   }
 

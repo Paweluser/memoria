@@ -1,6 +1,6 @@
 import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { TeamForm } from "@/app/components/Form/TeamForm";
-import { AppLink } from "@/app/components/AppLink";
+import { AccessDenied } from "@/app/components/AccessDenied";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
 
@@ -10,17 +10,11 @@ export default async function NewTeamPage() {
 
   if (!canCreateTeam) {
     return (
-      <>
-        <PageHeader title="Brak dostępu" />
-
-        <p className="mb-4">
-          Nie masz uprawnień do dodawania zespołów.
-        </p>
-
-        <AppLink href="/dashboard/teams">
-          Wróć do listy zespołów
-        </AppLink>
-      </>
+      <AccessDenied
+        message="Nie masz uprawnień do dodawania zespołów."
+        backHref="/dashboard/teams"
+        backLabel="Wróć do listy zespołów"
+      />
     );
   }
 
