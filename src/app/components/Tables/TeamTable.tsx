@@ -1,4 +1,6 @@
 import { TeamTableData } from "@/types/teamTypes";
+import Link from "next/link";
+import { Eye } from "lucide-react";
 
 type TeamTableProps = {
   data: TeamTableData;
@@ -12,13 +14,14 @@ export function TeamTable({ data }: TeamTableProps) {
           <tr className="[&>th]:px-4 [&>th]:py-3">
             <th className="px-3 py-2">Nazwa zespołu</th>
             <th className="px-3 py-2">Liczba pracowników</th>
+            <th className="px-3 py-2">Szczegóły</th>
           </tr>
         </thead>
 
         <tbody className="divide-y divide-(--table-border)">
           {data.length === 0 ? (
             <tr>
-              <td colSpan={2} className="px-4 py-6 text-center">
+              <td colSpan={3} className="px-4 py-6 text-center">
                 Brak zespołów do wyświetlenia.
               </td>
             </tr>
@@ -30,6 +33,14 @@ export function TeamTable({ data }: TeamTableProps) {
               >
                 <td>{team.teamName}</td>
                 <td>{team.membersCount}</td>
+                <td>
+                  <Link
+                    href={`/dashboard/teams/${team.id}`}
+                    className="inline-flex rounded p-1 hover:text-(--accent-color)"
+                  >
+                    <Eye className="size-5" />
+                  </Link>
+                </td>
               </tr>
             ))
           )}

@@ -19,6 +19,32 @@ export async function getTeamById(id: number) {
   });
 }
 
+export async function getTeamDetails(id: number) {
+  return db.query.teams.findFirst({
+    where: eq(teams.id, id),
+    columns: {
+      id: true,
+      teamName: true,
+    },
+    with: {
+      employees: {
+        columns: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+        },
+        orderBy: (employees, { asc }) => [
+          asc(employees.lastName),
+          asc(employees.firstName),
+          asc(employees.id),
+        ],
+      },
+    },
+  });
+}
+
 export async function getTeamsTableData(page = 1, pageSize = 10) {
   const offset = (page - 1) * pageSize;
 
