@@ -19,6 +19,14 @@ export async function getTeamById(id: number) {
   });
 }
 
+export async function updateTeamName(id: number, teamName: string) {
+  return db
+    .update(teams)
+    .set({ teamName })
+    .where(eq(teams.id, id))
+    .returning({ id: teams.id });
+}
+
 export async function getTeamDetails(id: number) {
   return db.query.teams.findFirst({
     where: eq(teams.id, id),

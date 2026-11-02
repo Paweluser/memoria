@@ -4,6 +4,7 @@ import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { EmployeeTable } from "@/app/components/Tables/EmployeeTable";
 import { getTeamDetails } from "@/db/queries/team";
 import { requireUser } from "@/db/session";
+import { hasRole } from "@/db/permissions";
 
 type TeamDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -12,7 +13,8 @@ type TeamDetailsPageProps = {
 export default async function TeamDetailsPage({
   params,
 }: TeamDetailsPageProps) {
-  await requireUser();
+  const session = await requireUser();
+  const canEditTeam = await hasRole(session.userId, ["ADMIN"]);
 
   const { id } = await params;
   const teamId = Number(id);
@@ -30,10 +32,15 @@ export default async function TeamDetailsPage({
         description={`Liczba pracowników: ${team.employees.length}`}
       />
 
-      <div className="flex justify-center">
+      <div className="flex flex-wrap justify-center gap-4">
         <AppLink href="/dashboard/teams">
           Wróć do listy zespołów
         </AppLink>
+        {canEditTeam && (
+          <AppLink href={`/dashboard/teams/${team.id}/edit`}>
+            Edytuj
+          </AppLink>
+        )}
       </div>
 
       {team.employees.length > 0 ? (
