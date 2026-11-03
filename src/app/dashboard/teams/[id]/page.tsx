@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { AppLink } from "@/app/components/AppLink";
 import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { EmployeeTable } from "@/app/components/Tables/EmployeeTable";
+import { AssignEmployeeForm } from "@/app/components/Form/AssignEmployeeForm";
 import { getTeamDetails } from "@/db/queries/team";
+import { getEmployeeList } from "@/db/queries/employee";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
 
@@ -25,6 +27,10 @@ export default async function TeamDetailsPage({
     notFound();
   }
 
+  const availableEmployees = canEditTeam
+    ? await getEmployeeList({ withoutTeam: true })
+    : [];
+
   return (
     <>
       <PageHeader
@@ -43,12 +49,19 @@ export default async function TeamDetailsPage({
         )}
       </div>
 
+
       {team.employees.length > 0 ? (
         <EmployeeTable data={team.employees} />
       ) : (
         <p className="mt-8 text-center">
           Ten zespół nie ma jeszcze przypisanych pracowników.
         </p>
+      )}
+      {canEditTeam && (
+        <AssignEmployeeForm
+          teamId={team.id}
+          employees={availableEmployees}
+        />
       )}
     </>
   );

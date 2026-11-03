@@ -1,13 +1,43 @@
 import { db } from "@/db";
 import { employees } from "../schema";
-import { count, eq } from "drizzle-orm";
+import { and, asc, count, eq, isNull } from "drizzle-orm";
 
-export async function getEmployeeList() {
-    return await db.select({
-        id: employees.id,
-        firstName: employees.firstName,
-        lastName: employees.lastName
-    }).from(employees)
+type EmployeeListOptions = {
+  withoutTeam?: boolean;
+};
+
+export async function getEmployeeList({
+  withoutTeam = false,
+}: EmployeeListOptions = {}) {
+  return db
+    .select({
+      id: employees.id,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+    })
+    .from(employees)
+    .where(withoutTeam ? isNull(employees.teamId) : undefined)
+    .orderBy(
+      asc(employees.lastName),
+      asc(employees.firstName),
+      asc(employees.id),
+    );
+}
+
+export async function assignEmployeeToTeam(
+  employeeId: number,
+  teamId: number,
+) {
+  return db
+    .update(employees)
+    .set({ teamId })
+    .where(
+      and(
+        eq(employees.id, employeeId),
+        isNull(employees.teamId),
+      ),
+    )
+    .returning({ id: employees.id });
 }
 
 export async function getEmployees(page = 1, pageSize = 10) {

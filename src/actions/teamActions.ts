@@ -2,16 +2,23 @@
 
 import { db } from "@/db";
 import { teams } from "@/db/schema";
-import { teamSchema } from "@/db/validations/teamSchema";
+import { teamSchema, assignEmployeeSchema } from "@/db/validations/teamSchema";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
-import { updateTeamName } from "@/db/queries/team";
+import { getTeamById, updateTeamName } from "@/db/queries/team";
+import { assignEmployeeToTeam } from "@/db/queries/employee";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import z from "zod";
 
 type TeamFormState = {
     errors: z.inferFlattenedErrors<typeof teamSchema>["fieldErrors"] & {
+        general?: string[];
+    };
+};
+
+type AssignEmployeeFormState = {
+    errors: z.inferFlattenedErrors<typeof assignEmployeeSchema>["fieldErrors"] & {
         general?: string[];
     };
 };
@@ -106,6 +113,75 @@ export async function updateTeamAction(
 
     revalidatePath("/dashboard/teams");
     revalidatePath(`/dashboard/teams/${teamId}`);
+
+    redirect(`/dashboard/teams/${teamId}`);
+}
+
+export async function assignEmployeeToTeamAction(
+    teamId: number,
+    prevState: AssignEmployeeFormState,
+    formData: FormData,
+): Promise<AssignEmployeeFormState> {
+    const session = await requireUser();
+
+    try {
+        const canAssignEmployee = await hasRole(session.userId, ["ADMIN"]);
+
+        if (!canAssignEmployee) {
+            return {
+                errors: {
+                    general: ["Nie masz uprawnień do przypisywania pracowników."],
+                },
+            };
+        }
+
+        const validatedFields = assignEmployeeSchema.safeParse({
+            employeeId: Number(formData.get("employeeId")),
+        });
+
+        if (!validatedFields.success) {
+            return {
+                errors: validatedFields.error.flatten().fieldErrors,
+            };
+        }
+
+        const team = await getTeamById(teamId);
+
+        if (!team) {
+            return {
+                errors: {
+                    general: ["Zespół nie istnieje."],
+                },
+            };
+        }
+
+        const [assignedEmployee] = await assignEmployeeToTeam(
+            validatedFields.data.employeeId,
+            teamId,
+        );
+
+        if (!assignedEmployee) {
+            return {
+                errors: {
+                    general: [
+                        "Pracownik nie istnieje lub jest już przypisany do zespołu.",
+                    ],
+                },
+            };
+        }
+    } catch (error) {
+        console.error("Błąd podczas przypisywania pracownika:", error);
+
+        return {
+            errors: {
+                general: ["Wystąpił błąd podczas przypisywania pracownika."],
+            },
+        };
+    }
+
+    revalidatePath("/dashboard/teams");
+    revalidatePath(`/dashboard/teams/${teamId}`);
+    revalidatePath("/dashboard/employees");
 
     redirect(`/dashboard/teams/${teamId}`);
 }

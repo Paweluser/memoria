@@ -7,3 +7,10 @@ export const teamSchema = z.object({
         .min(2, "Nazwa zespołu musi mieć co najmniej 2 znaki.")
         .max(100, "Nazwa zespołu nie może przekraczać 100 znaków."),
 });
+
+export const assignEmployeeSchema = z.object({
+    employeeId: z
+        .number({ error: "Wybierz pracownika." })
+        .int("Wybierz poprawnego pracownika.")
+        .positive("Wybierz pracownika."),
+});
