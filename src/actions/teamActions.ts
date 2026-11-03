@@ -6,7 +6,7 @@ import { teamSchema, assignEmployeeSchema } from "@/db/validations/teamSchema";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
 import { getTeamById, updateTeamName } from "@/db/queries/team";
-import { assignEmployeeToTeam } from "@/db/queries/employee";
+import { assignEmployeeToTeam, removeEmployeeFromTeam } from "@/db/queries/employee";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import z from "zod";
@@ -19,6 +19,12 @@ type TeamFormState = {
 
 type AssignEmployeeFormState = {
     errors: z.inferFlattenedErrors<typeof assignEmployeeSchema>["fieldErrors"] & {
+        general?: string[];
+    };
+};
+
+type RemoveEmployeeFormState = {
+    errors: {
         general?: string[];
     };
 };
@@ -175,6 +181,54 @@ export async function assignEmployeeToTeamAction(
         return {
             errors: {
                 general: ["Wystąpił błąd podczas przypisywania pracownika."],
+            },
+        };
+    }
+
+    revalidatePath("/dashboard/teams");
+    revalidatePath(`/dashboard/teams/${teamId}`);
+    revalidatePath("/dashboard/employees");
+
+    redirect(`/dashboard/teams/${teamId}`);
+}
+
+export async function removeEmployeeFromTeamAction(
+    teamId: number,
+    employeeId: number,
+): Promise<RemoveEmployeeFormState> {
+    const session = await requireUser();
+
+    try {
+        const canRemoveEmployee = await hasRole(session.userId, ["ADMIN"]);
+
+        if (!canRemoveEmployee) {
+            return {
+                errors: {
+                    general: ["Nie masz uprawnień do odłączania pracowników."],
+                },
+            };
+        }
+
+        const [removedEmployee] = await removeEmployeeFromTeam(
+            employeeId,
+            teamId,
+        );
+
+        if (!removedEmployee) {
+            return {
+                errors: {
+                    general: [
+                        "Pracownik nie istnieje lub nie należy już do tego zespołu.",
+                    ],
+                },
+            };
+        }
+    } catch (error) {
+        console.error("Błąd podczas odłączania pracownika:", error);
+
+        return {
+            errors: {
+                general: ["Wystąpił błąd podczas odłączania pracownika."],
             },
         };
     }

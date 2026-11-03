@@ -49,9 +49,11 @@ export default async function TeamDetailsPage({
         )}
       </div>
 
-
       {team.employees.length > 0 ? (
-        <EmployeeTable data={team.employees} />
+        <EmployeeTable
+          data={team.employees}
+          teamId={canEditTeam ? team.id : undefined}
+        />
       ) : (
         <p className="mt-8 text-center">
           Ten zespół nie ma jeszcze przypisanych pracowników.

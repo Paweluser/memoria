@@ -40,6 +40,22 @@ export async function assignEmployeeToTeam(
     .returning({ id: employees.id });
 }
 
+export async function removeEmployeeFromTeam(
+  employeeId: number,
+  teamId: number,
+) {
+  return db
+    .update(employees)
+    .set({ teamId: null })
+    .where(
+      and(
+        eq(employees.id, employeeId),
+        eq(employees.teamId, teamId),
+      ),
+    )
+    .returning({ id: employees.id });
+}
+
 export async function getEmployees(page = 1, pageSize = 10) {
   const offset = (page - 1) * pageSize;
 
