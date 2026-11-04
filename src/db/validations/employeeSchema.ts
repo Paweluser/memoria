@@ -42,3 +42,9 @@ export const employeeSchema = z.object({
   })
   .default("EMPLOYEE"),
 });
+
+export const updateEmployeeSchema = employeeSchema.pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+});

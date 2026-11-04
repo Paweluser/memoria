@@ -53,6 +53,7 @@ export default async function TeamDetailsPage({
         <EmployeeTable
           data={team.employees}
           teamId={canEditTeam ? team.id : undefined}
+          canEdit={canEditTeam}
         />
       ) : (
         <p className="mt-8 text-center">

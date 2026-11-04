@@ -2,13 +2,16 @@
 
 import { db } from "@/db";
 import { employees } from "@/db/schema";
-import { employeeSchema } from "@/db/validations/employeeSchema";
+import {
+  employeeSchema,
+  updateEmployeeSchema,
+} from "@/db/validations/employeeSchema";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
 import { getTeamById } from "@/db/queries/team";
+import { getEmployeeByEmail, updateEmployee } from "@/db/queries/employee";
 import { revalidatePath } from "next/cache";
 import z from "zod";
 
@@ -55,12 +58,7 @@ export async function createEmployeeAction(
       };
     }
 
-    const existingUser = await db.query.employees.findFirst({
-      where: eq(employees.email, email),
-      columns: {
-        id: true,
-      },
-    });
+    const existingUser = await getEmployeeByEmail(email);
 
     if (existingUser) {
       return {
@@ -92,5 +90,78 @@ export async function createEmployeeAction(
 
   revalidatePath("/dashboard/employees");
   revalidatePath("/dashboard/teams");
+  redirect("/dashboard/employees");
+}
+
+export async function updateEmployeeAction(
+  employeeId: number,
+  prevState: EmployeeFormState,
+  formData: FormData,
+): Promise<EmployeeFormState> {
+  const session = await requireUser();
+  let teamId: number | null = null;
+
+  try {
+    const canEditEmployee = await hasRole(session.userId, ["ADMIN"]);
+
+    if (!canEditEmployee) {
+      return {
+        errors: {
+          general: ["Nie masz uprawnień do edytowania pracowników."],
+        },
+      };
+    }
+
+    const validatedFields = updateEmployeeSchema.safeParse(
+      Object.fromEntries(formData.entries()),
+    );
+
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+      };
+    }
+
+    const existingEmployee = await getEmployeeByEmail(validatedFields.data.email);
+
+    if (existingEmployee && existingEmployee.id !== employeeId) {
+      return {
+        errors: {
+          email: ["Konto z tym adresem e-mail już istnieje."],
+        },
+      };
+    }
+
+    const [updatedEmployee] = await updateEmployee(
+      employeeId,
+      validatedFields.data,
+    );
+
+    if (!updatedEmployee) {
+      return {
+        errors: {
+          general: ["Pracownik nie istnieje."],
+        },
+      };
+    }
+
+    teamId = updatedEmployee.teamId;
+  } catch (error) {
+    console.error("Błąd podczas edytowania pracownika:", error);
+
+    return {
+      errors: {
+        general: ["Wystąpił błąd podczas zapisywania zmian."],
+      },
+    };
+  }
+
+  revalidatePath("/dashboard/employees");
+  revalidatePath(`/dashboard/employees/${employeeId}/edit`);
+
+  if (teamId !== null) {
+    revalidatePath(`/dashboard/teams/${teamId}`);
+  }
+
   redirect("/dashboard/employees");
 }

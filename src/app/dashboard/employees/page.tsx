@@ -14,7 +14,7 @@ export default async function EmployeesPage({
   searchParams,
 }: EmployeesPageProps) {
   const session = await requireUser();
-  const canCreateEmployee = await hasRole(session.userId, ["ADMIN"]);
+  const canManageEmployees = await hasRole(session.userId, ["ADMIN"]);
 
   const { page } = await searchParams;
   const currentPage = Number(page) > 0 ? Number(page) : 1;
@@ -27,12 +27,12 @@ export default async function EmployeesPage({
         title="Pracownicy"
         description="Lista wszystkich pracowników w zakładzie."
       />
-      {canCreateEmployee && (
+      {canManageEmployees && (
         <div className="flex justify-center">
           <AppLink href="/dashboard/employees/new">Dodaj</AppLink>
         </div>
       )}
-      <EmployeeTable data={data} />
+      <EmployeeTable data={data} canEdit={canManageEmployees} />
       <Pagination currentPage={currentPage} totalPages={totalPages} />
     </>
   );

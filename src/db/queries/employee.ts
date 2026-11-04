@@ -1,6 +1,46 @@
 import { db } from "@/db";
 import { employees } from "../schema";
 import { and, asc, count, eq, isNull } from "drizzle-orm";
+import type { EmployeeData } from "@/types/employeeTypes";
+
+export async function getEmployeeById(id: number) {
+  return db.query.employees.findFirst({
+    where: eq(employees.id, id),
+    columns: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+    },
+  });
+}
+
+export async function getEmployeeByEmail(email: string) {
+  return db.query.employees.findFirst({
+    where: eq(employees.email, email),
+    columns: {
+      id: true,
+    },
+  });
+}
+
+export async function updateEmployee(
+  id: number,
+  data: Pick<EmployeeData, "firstName" | "lastName" | "email">,
+) {
+  return db
+    .update(employees)
+    .set({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+    })
+    .where(eq(employees.id, id))
+    .returning({
+      id: employees.id,
+      teamId: employees.teamId,
+    });
+}
 
 type EmployeeListOptions = {
   withoutTeam?: boolean;
