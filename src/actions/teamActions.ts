@@ -1,11 +1,9 @@
 "use server";
 
-import { db } from "@/db";
-import { teams } from "@/db/schema";
 import { teamSchema, assignEmployeeSchema } from "@/db/validations/teamSchema";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
-import { getTeamById, updateTeamName } from "@/db/queries/team";
+import { createTeamWithEmployees, getTeamById, updateTeamName } from "@/db/queries/team";
 import { assignEmployeeToTeam, removeEmployeeFromTeam } from "@/db/queries/employee";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -46,24 +44,43 @@ export async function createTeamAction(
             };
         }
 
-        const rawData = Object.fromEntries(formData.entries());
-        const validatedFields = teamSchema.safeParse(rawData);
+        const validatedFields = teamSchema.safeParse({
+            teamName: formData.get("teamName"),
+        });
 
         if (!validatedFields.success) {
             return { errors: validatedFields.error.flatten().fieldErrors };
         }
 
-        const { teamName } = validatedFields.data;
+        const validatedEmployees = z
+            .array(assignEmployeeSchema.shape.employeeId)
+            .safeParse(formData.getAll("employeeIds").map(Number));
 
-        await db.insert(teams).values({
-            teamName,
-        });
+        if (!validatedEmployees.success) {
+            return {
+                errors: {
+                    general: ["Wybierz poprawnych pracowników."],
+                },
+            };
+        }
+
+        await createTeamWithEmployees(
+            validatedFields.data.teamName,
+            validatedEmployees.data,
+        );
     } catch (error) {
         console.error("Błąd podczas dodawania zespołu:", error);
         return {
-            errors: { general: ["Wystąpił błąd serwera podczas zapisywania."] },
+            errors: {
+                general: [
+                    "Nie udało się utworzyć zespołu. Odśwież stronę i spróbuj ponownie.",
+                ],
+            },
         };
     }
+
+    revalidatePath("/dashboard/teams");
+    revalidatePath("/dashboard/employees");
 
     redirect("/dashboard/teams");
 }

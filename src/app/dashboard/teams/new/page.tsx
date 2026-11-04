@@ -3,6 +3,7 @@ import { TeamForm } from "@/app/components/Form/TeamForm";
 import { AccessDenied } from "@/app/components/AccessDenied";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
+import { getEmployeeList } from "@/db/queries/employee";
 
 export default async function NewTeamPage() {
   const session = await requireUser();
@@ -18,10 +19,12 @@ export default async function NewTeamPage() {
     );
   }
 
+  const employees = await getEmployeeList({ withoutTeam: true });
+
   return (
     <>
       <PageHeader title="Nowy zespół" />
-      <TeamForm />
+      <TeamForm employees={employees} />
     </>
   );
 }

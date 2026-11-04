@@ -1,6 +1,39 @@
-import { asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
-import { teams } from "@/db/schema";
+import { teams, employees } from "@/db/schema";
+
+export async function createTeamWithEmployees(
+  teamName: string,
+  employeeIds: number[],
+) {
+  const uniqueEmployeeIds = [...new Set(employeeIds)];
+
+  await db.transaction(async (tx) => {
+    const [team] = await tx
+      .insert(teams)
+      .values({ teamName })
+      .returning({ id: teams.id });
+
+    if (uniqueEmployeeIds.length === 0) {
+      return;
+    }
+
+    const assignedEmployees = await tx
+      .update(employees)
+      .set({ teamId: team.id })
+      .where(
+        and(
+          inArray(employees.id, uniqueEmployeeIds),
+          isNull(employees.teamId),
+        ),
+      )
+      .returning({ id: employees.id });
+
+    if (assignedEmployees.length !== uniqueEmployeeIds.length) {
+      tx.rollback();
+    }
+  });
+}
 
 export async function getTeamList() {
   return db

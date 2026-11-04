@@ -2,21 +2,23 @@
 
 import { useActionState } from "react";
 import { createTeamAction, updateTeamAction } from "@/actions/teamActions";
-import type { SimpleTeam } from "@/types/teamTypes";
+import { SimpleTeam } from "@/types/teamTypes";
+import { SimpleEmployee } from "@/types/employeeTypes";
 import { Input } from "./UI/Input";
 import { SubmitBtn } from "./UI/SubmitBtn";
 import { FormError } from "./UI/FormError";
 
 type TeamFormProps = {
   team?: SimpleTeam;
+  employees?: SimpleEmployee[];
 };
 
-export function TeamForm({ team }: TeamFormProps) {
+export function TeamForm({ team, employees = [] }: TeamFormProps) {
   const action = team
     ? updateTeamAction.bind(null, team.id)
     : createTeamAction;
 
-  const [state, formAction] = useActionState(action, {
+  const [state, formAction, isPending] = useActionState(action, {
     errors: {},
   });
 
@@ -38,6 +40,29 @@ export function TeamForm({ team }: TeamFormProps) {
       />
       {state?.errors?.teamName && (
         <FormError>{state.errors.teamName[0]}</FormError>
+      )}
+
+      {!team && (
+        <fieldset disabled={isPending} className="space-y-3">
+          <legend className="mb-2 font-medium">
+            Pracownicy — opcjonalnie
+          </legend>
+
+          {employees.length > 0 ? (
+            employees.map((employee) => (
+              <label key={employee.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="employeeIds"
+                  value={employee.id}
+                />
+                {employee.firstName} {employee.lastName}
+              </label>
+            ))
+          ) : (
+            <p>Brak pracowników bez zespołu. Możesz utworzyć pusty zespół.</p>
+          )}
+        </fieldset>
       )}
 
       <div className="flex justify-end pt-4">
