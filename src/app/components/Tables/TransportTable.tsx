@@ -1,10 +1,13 @@
 import { TransportTableData } from "@/types/transportsTypes";
+import Link from "next/link";
+import { Pencil } from "lucide-react";
 
 type TransportTableProps = {
   data: TransportTableData;
+  canEdit?: boolean;
 };
 
-export function TransportTable({ data }: TransportTableProps) {
+export function TransportTable({ data, canEdit = false }: TransportTableProps) {
   return (
     <div className="mt-8 overflow-x-auto rounded-lg border border-(--table-border) shadow-sm">
       <table className="min-w-full text-left text-sm whitespace-nowrap lg:text-base">
@@ -15,6 +18,7 @@ export function TransportTable({ data }: TransportTableProps) {
             <th className="px-3 py-2">Telefon klienta</th>
             <th className="px-3 py-2">Osoba zlecająca</th>
             <th className="px-3 py-2">Przypisany pracownik</th>
+            {canEdit && <th className="px-3 py-2">Edycja</th>}
           </tr>
         </thead>
         <tbody>
@@ -36,6 +40,16 @@ export function TransportTable({ data }: TransportTableProps) {
                   ? `${transport.employee.firstName} ${transport.employee.lastName}`
                   : "Brak"}
               </td>
+              {canEdit && (
+                <td>
+                  <Link
+                    href={`/dashboard/transports/${transport.id}/edit`}
+                    className="inline-flex rounded p-1 hover:text-(--accent-color)"
+                  >
+                    <Pencil className="size-5"/>
+                  </Link>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

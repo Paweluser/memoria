@@ -12,7 +12,7 @@ type TransportsPageProps = {
 
 export default async function TransportsPage({ searchParams }: TransportsPageProps) {
   const session = await requireUser();
-  const canCreateTransport = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
+  const canManageTransports = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
 
   const { page } = await searchParams;
   const currentPage = Number(page) > 0 ? Number(page) : 1;
@@ -25,12 +25,12 @@ export default async function TransportsPage({ searchParams }: TransportsPagePro
         title="Przewozy"
         description="Zbiór wszystkich aktualnych przewozów."
       />
-      {canCreateTransport && (
+      {canManageTransports && (
         <div className="flex justify-center">
           <AppLink href="/dashboard/transports/new">Dodaj</AppLink>
         </div>
       )}
-      <TransportTable data={data} />
+      <TransportTable data={data} canEdit={canManageTransports} />
       <Pagination currentPage={currentPage} totalPages={totalPages} />
     </>
   );
