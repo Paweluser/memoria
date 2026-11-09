@@ -1,4 +1,5 @@
 import { CeremonyTableData } from "@/types/funeralsTypes";
+import Link from "next/link";
 
 type CeremonyTableProps = {
   data: CeremonyTableData;
@@ -25,7 +26,7 @@ export function CeremonyTable({ data }: CeremonyTableProps) {
           {data.map((ceremony) => (
             <tr
               key={ceremony.id}
-              className="border-b border-(--table-border) last:border-0 [&>td]:px-4 [&>td]:py-3"
+              className="relative cursor-pointer border-b border-(--table-border) transition-colors last:border-0 hover:bg-(--table-header-bg) focus-within:bg-(--table-header-bg) [&>td]:px-4 [&>td]:py-3"
             >
               <td>
                 {ceremony.client
@@ -33,9 +34,14 @@ export function CeremonyTable({ data }: CeremonyTableProps) {
                   : "Brak"}
               </td>
               <td>
-                {ceremony.deceased
-                  ? `${ceremony.deceased.firstName} ${ceremony.deceased.lastName}`
-                  : "Brak"}
+                <Link
+                  href={`/dashboard/funerals/${ceremony.id}`}
+                  className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-(--table-border)"
+                >
+                  {ceremony.deceased
+                    ? `${ceremony.deceased.firstName} ${ceremony.deceased.lastName}`
+                    : "Brak"}
+                </Link>
               </td>
               <td>{ceremony.team?.teamName || "Brak zespołu"}</td>
               <td>{ceremony.city}</td>
