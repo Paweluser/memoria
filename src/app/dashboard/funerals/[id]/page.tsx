@@ -4,6 +4,8 @@ import { AppLink } from "@/app/components/AppLink";
 import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { getCeremonyById } from "@/db/queries/ceremony";
 import { requireUser } from "@/db/session";
+import { hasRole } from "@/db/permissions";
+import { DeleteFuneralForm } from "@/app/components/Form/DeleteFuneralForm";
 
 type FuneralDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -12,7 +14,8 @@ type FuneralDetailsPageProps = {
 export default async function FuneralDetailsPage({
   params,
 }: FuneralDetailsPageProps) {
-  await requireUser();
+  const session = await requireUser();
+  const canDeleteFuneral = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
 
   const { id } = await params;
   const funeral = await getCeremonyById(Number(id));
@@ -145,8 +148,9 @@ export default async function FuneralDetailsPage({
         </section>
       </div>
 
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6 flex flex-wrap justify-center gap-4">
         <AppLink href="/dashboard/funerals">Wróć do listy pogrzebów</AppLink>
+        {canDeleteFuneral && <DeleteFuneralForm funeralId={funeral.id} />}
       </div>
     </>
   );

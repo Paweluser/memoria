@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { createFuneralAction } from "@/actions/funeralActions";
 import { ProgressBar } from "./Form/UI/ProgressBar";
 import { Modal } from "./Modal";
+import { AppBtn } from "./AppBtn";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export function FuneralWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
@@ -112,10 +114,27 @@ export function FuneralWizard() {
 
       {modal.isOpen && (
         <Modal
-          type={modal.type}
-          message={modal.message}
+          title={modal.type === "success" ? "Sukces!" : "Wystąpił problem"}
           onClose={handleCloseModal}
-        />
+        >
+          <div className="flex flex-col items-center text-center">
+            {modal.type === "success" ? (
+              <CheckCircle2
+                className="mb-4 size-16 text-(--accent-color)"
+                aria-hidden="true"
+              />
+            ) : (
+              <XCircle
+                className="mb-4 size-16 text-(--accent-color)"
+                aria-hidden="true"
+              />
+            )}
+            <p className="mb-6">{modal.message}</p>
+            <AppBtn onClick={handleCloseModal}>
+              {modal.type === "success" ? "Przejdź do listy" : "Spróbuj ponownie"}
+            </AppBtn>
+          </div>
+        </Modal>
       )}
     </>
   );

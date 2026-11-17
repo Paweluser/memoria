@@ -1,6 +1,45 @@
-import { count, eq } from "drizzle-orm";
+import { and, count, eq, notExists } from "drizzle-orm";
 import { db } from "../index";
-import { ceremonies } from "../schema";
+import { ceremonies, clients, deceased } from "../schema";
+
+export async function deleteFuneral(id: number) {
+    return db.transaction(async (tx) => {
+        const [deletedCeremony] = await tx
+            .delete(ceremonies)
+            .where(eq(ceremonies.id, id))
+            .returning({
+                id: ceremonies.id,
+                clientId: ceremonies.clientId,
+                deceasedId: ceremonies.deceasedId,
+            });
+
+        if (!deletedCeremony) return;
+
+        if (deletedCeremony.deceasedId !== null) {
+            await tx
+                .delete(deceased)
+                .where(eq(deceased.id, deletedCeremony.deceasedId));
+        }
+
+        if (deletedCeremony.clientId !== null) {
+            await tx
+                .delete(clients)
+                .where(
+                    and(
+                        eq(clients.id, deletedCeremony.clientId),
+                        notExists(
+                            tx
+                                .select({ id: ceremonies.id })
+                                .from(ceremonies)
+                                .where(eq(ceremonies.clientId, deletedCeremony.clientId)),
+                        ),
+                    ),
+                );
+        }
+
+        return deletedCeremony;
+    });
+}
 
 export async function getCeremonyById(id: number) {
     return db.query.ceremonies.findFirst({

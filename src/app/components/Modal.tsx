@@ -1,36 +1,60 @@
-import { CheckCircle2, XCircle } from "lucide-react";
-import { AppBtn } from "./AppBtn";
+"use client";
+
+import { useEffect, useRef, ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type ModalProps = {
-  type: "success" | "error";
-  message: string;
+  title: string;
+  children: ReactNode;
   onClose: () => void;
+  isPending?: boolean;
 };
 
-export function Modal({ type, message, onClose }: ModalProps) {
-  const isSuccess = type === "success";
+export function Modal({
+  title,
+  children,
+  onClose,
+  isPending = false,
+}: ModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
-      <div className="max-w-md rounded-xl border border-(--second-color) bg-(--main-color) p-4 md:p-6">
-        <div className="flex flex-col items-center text-center">
-          {isSuccess ? (
-            <CheckCircle2 className="mb-4 h-16 w-16 text-(--accent-color)" />
-          ) : (
-            <XCircle className="mb-4 h-16 w-16 text-(--accent-color)" />
-          )}
+  useEffect(() => {
+    const dialog = dialogRef.current;
 
-          <h3 className="mb-2 text-xl font-bold text-gray-900">
-            {isSuccess ? "Sukces!" : "Wystąpił problem"}
-          </h3>
+    if (!dialog) return;
 
-          <p className="mb-6">{message}</p>
+    if (!dialog.open) {
+      dialog.showModal();
+    }
 
-          <AppBtn onClick={onClose}>
-            {isSuccess ? "Przejdź do listy" : "Spróbuj ponownie"}
-          </AppBtn>
-        </div>
-      </div>
-    </div>
+    return () => {
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, []);
+
+  const handleClose = () => {
+    if (!isPending) {
+      onClose();
+    }
+  };
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <dialog
+      ref={dialogRef}
+      onCancel={(event) => {
+        event.preventDefault();
+        handleClose();
+      }}
+      className="m-auto max-h-[90dvh] w-11/12 max-w-md overflow-y-auto rounded-xl border border-(--second-color) bg-(--main-color) p-6 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+    >
+      <h2 className="mb-6 text-xl font-medium">{title}</h2>
+
+      {children}
+    </dialog>,
+    document.body,
   );
 }

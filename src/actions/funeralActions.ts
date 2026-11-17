@@ -8,12 +8,79 @@ import { deceasedSchema } from "@/db/validations/deceasedSchema";
 import { ceremoniesSchema } from "@/db/validations/ceremoniesSchema";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
+import { deleteFuneral } from "@/db/queries/ceremony";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const createFuneralSchema = z.object({
   client: clientsSchema,
   deceased: deceasedSchema,
   ceremony: ceremoniesSchema,
 });
+
+type DeleteFuneralFormState = {
+  errors: {
+    general?: string[];
+  };
+};
+
+export async function deleteFuneralAction(
+  funeralId: number,
+): Promise<DeleteFuneralFormState> {
+  const session = await requireUser();
+
+  try {
+    const canDeleteFuneral = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
+
+    if (!canDeleteFuneral) {
+      return {
+        errors: {
+          general: ["Nie masz uprawnień do usuwania pogrzebów."],
+        },
+      };
+    }
+
+    const deletedFuneral = await deleteFuneral(funeralId);
+
+    if (!deletedFuneral) {
+      return {
+        errors: {
+          general: ["Pogrzeb już nie istnieje."],
+        },
+      };
+    }
+  } catch (error) {
+    const databaseError =
+      error instanceof Error ? (error.cause ?? error) : error;
+
+    if (
+      typeof databaseError === "object" &&
+      databaseError !== null &&
+      "constraint" in databaseError &&
+      databaseError.constraint === "Invoice_ceremonyId_Ceremony_id_fk"
+    ) {
+      return {
+        errors: {
+          general: [
+            "Nie można usunąć pogrzebu, ponieważ ma powiązaną fakturę.",
+          ],
+        },
+      };
+    }
+
+    console.error("Błąd podczas usuwania pogrzebu:", error);
+
+    return {
+      errors: {
+        general: ["Nie udało się usunąć pogrzebu."],
+      },
+    };
+  }
+
+  revalidatePath("/dashboard/funerals");
+  revalidatePath(`/dashboard/funerals/${funeralId}`);
+  redirect("/dashboard/funerals");
+}
 
 export async function createFuneralAction(data: unknown) {
   const session = await requireUser();
