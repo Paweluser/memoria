@@ -1,6 +1,7 @@
 import { TransportTableData } from "@/types/transportsTypes";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import { DeleteTransportForm } from "@/app/components/Form/DeleteTransportForm";
 
 type TransportTableProps = {
   data: TransportTableData;
@@ -18,7 +19,12 @@ export function TransportTable({ data, canEdit = false }: TransportTableProps) {
             <th className="px-3 py-2">Telefon klienta</th>
             <th className="px-3 py-2">Osoba zlecająca</th>
             <th className="px-3 py-2">Przypisany pracownik</th>
-            {canEdit && <th className="px-3 py-2">Edycja</th>}
+            {canEdit && (
+              <>
+                <th className="px-3 py-2">Edycja</th>
+                <th className="px-3 py-2">Usuwanie</th>
+              </>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -41,14 +47,19 @@ export function TransportTable({ data, canEdit = false }: TransportTableProps) {
                   : "Brak"}
               </td>
               {canEdit && (
-                <td>
-                  <Link
-                    href={`/dashboard/transports/${transport.id}/edit`}
-                    className="inline-flex rounded p-1 hover:text-(--accent-color)"
-                  >
-                    <Pencil className="size-5"/>
-                  </Link>
-                </td>
+                <>
+                  <td>
+                    <Link
+                      href={`/dashboard/transports/${transport.id}/edit`}
+                      className="inline-flex rounded p-1 hover:text-(--accent-color)"
+                    >
+                      <Pencil className="size-5" />
+                    </Link>
+                  </td>
+                  <td>
+                    <DeleteTransportForm transportId={transport.id} />
+                  </td>
+                </>
               )}
             </tr>
           ))}

@@ -5,7 +5,7 @@ import { transportOrders } from "@/db/schema";
 import { transportSchema } from "@/db/validations/transportSchema";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
-import { updateTransport } from "@/db/queries/transport";
+import { deleteTransport, updateTransport } from "@/db/queries/transport";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import z from "zod";
@@ -15,6 +15,52 @@ type TransportFormState = {
     general?: string[];
   };
 };
+
+type DeleteTransportFormState = {
+  errors: {
+    general?: string[];
+  };
+};
+
+export async function deleteTransportAction(
+  transportId: number,
+): Promise<DeleteTransportFormState> {
+  const session = await requireUser();
+
+  try {
+    const canDeleteTransport = await hasRole(session.userId, ["ADMIN", "MANAGER"]);
+
+    if (!canDeleteTransport) {
+      return {
+        errors: {
+          general: ["Nie masz uprawnień do usuwania przewozów."],
+        },
+      };
+    }
+
+    const [deletedTransport] = await deleteTransport(transportId);
+
+    if (!deletedTransport) {
+      return {
+        errors: {
+          general: ["Przewóz już nie istnieje."],
+        },
+      };
+    }
+  } catch (error) {
+    console.error("Błąd podczas usuwania przewozu:", error);
+
+    return {
+      errors: {
+        general: ["Nie udało się usunąć przewozu."],
+      },
+    };
+  }
+
+  revalidatePath("/dashboard/transports");
+  revalidatePath(`/dashboard/transports/${transportId}/edit`);
+  redirect("/dashboard/transports");
+}
 
 export async function createTransportAction(
   prevState: TransportFormState,

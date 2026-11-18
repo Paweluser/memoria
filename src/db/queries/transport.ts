@@ -3,6 +3,13 @@ import { db } from "../index";
 import { transportOrders } from "../schema";
 import type { TransportData } from "@/types/transportsTypes";
 
+export async function deleteTransport(id: number) {
+  return db
+    .delete(transportOrders)
+    .where(eq(transportOrders.id, id))
+    .returning({ id: transportOrders.id });
+}
+
 export async function getTransportById(id: number) {
   return db.query.transportOrders.findFirst({
     where: eq(transportOrders.id, id),
