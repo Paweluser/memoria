@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "./db/session";
+import { getEmployeeAccessById } from "./db/queries/employee";
 
 const protectedRoutes = ["/dashboard"];
 const publicRoutes = ["/login", "/"];
@@ -16,12 +17,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (
-    isPublicRoute &&
-    session?.userId &&
-    !path.startsWith("/dashboard")
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (isPublicRoute && session?.userId) {
+    const currentUser = await getEmployeeAccessById(session.userId);
+
+    if (currentUser) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    const response = NextResponse.next();
+    response.cookies.delete("session");
+    return response;
   }
 
   return NextResponse.next();

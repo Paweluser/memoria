@@ -32,7 +32,12 @@ export default async function EmployeesPage({
           <AppLink href="/dashboard/employees/new">Dodaj</AppLink>
         </div>
       )}
-      <EmployeeTable data={data} canEdit={canManageEmployees} />
+      <EmployeeTable
+        data={data}
+        canEdit={canManageEmployees}
+        canDelete={canManageEmployees}
+        currentUserId={session.userId}
+      />
       <Pagination currentPage={currentPage} totalPages={totalPages} />
     </>
   );

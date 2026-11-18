@@ -11,7 +11,11 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
 import { getTeamById } from "@/db/queries/team";
-import { getEmployeeByEmail, updateEmployee } from "@/db/queries/employee";
+import {
+  deleteEmployee,
+  getEmployeeByEmail,
+  updateEmployee,
+} from "@/db/queries/employee";
 import { revalidatePath } from "next/cache";
 import z from "zod";
 
@@ -20,6 +24,90 @@ type EmployeeFormState = {
     general?: string[];
   };
 };
+
+type DeleteEmployeeFormState = {
+  errors: {
+    general?: string[];
+  };
+};
+
+export async function deleteEmployeeAction(
+  employeeId: number,
+): Promise<DeleteEmployeeFormState> {
+  const session = await requireUser();
+  let teamId: number | null = null;
+
+  try {
+    const canDeleteEmployee = await hasRole(session.userId, ["ADMIN"]);
+
+    if (!canDeleteEmployee) {
+      return {
+        errors: {
+          general: ["Nie masz uprawnień do usuwania pracowników."],
+        },
+      };
+    }
+
+    if (employeeId === session.userId) {
+      return {
+        errors: {
+          general: ["Nie możesz usunąć własnego konta."],
+        },
+      };
+    }
+
+    const [deletedEmployee] = await deleteEmployee(employeeId);
+
+    if (!deletedEmployee) {
+      return {
+        errors: {
+          general: ["Pracownik już nie istnieje."],
+        },
+      };
+    }
+
+    teamId = deletedEmployee.teamId;
+  } catch (error) {
+    const databaseError =
+      error instanceof Error ? (error.cause ?? error) : error;
+
+    if (
+      typeof databaseError === "object" &&
+      databaseError !== null &&
+      "constraint" in databaseError &&
+      (
+        databaseError.constraint === "TransportOrder_managerId_Employee_id_fk" ||
+        databaseError.constraint === "TransportOrder_employeeId_Employee_id_fk"
+      )
+    ) {
+      return {
+        errors: {
+          general: [
+            "Nie można usunąć pracownika, ponieważ jest powiązany z przewozami. Najpierw zmień przypisania w tych przewozach.",
+          ],
+        },
+      };
+    }
+
+    console.error("Błąd podczas usuwania pracownika:", error);
+
+    return {
+      errors: {
+        general: ["Nie udało się usunąć pracownika."],
+      },
+    };
+  }
+
+  revalidatePath("/dashboard/employees");
+  revalidatePath(`/dashboard/employees/${employeeId}/edit`);
+  revalidatePath("/dashboard/teams");
+
+  if (teamId !== null) {
+    revalidatePath(`/dashboard/teams/${teamId}`);
+  }
+
+  redirect("/dashboard/employees");
+}
 
 export async function createEmployeeAction(
   prevState: EmployeeFormState,

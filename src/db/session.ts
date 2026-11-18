@@ -2,6 +2,7 @@ import 'server-only';
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getEmployeeAccessById } from "@/db/queries/employee";
 
 if (!process.env.JWT_SECRET) {
     throw new Error("Brak zmiennej jwt!");
@@ -66,6 +67,12 @@ export async function requireUser() {
 
     if (!session) {
         redirect('/login')
+    }
+
+    const currentUser = await getEmployeeAccessById(session.userId);
+
+    if (!currentUser) {
+        redirect('/login');
     }
 
     return session;

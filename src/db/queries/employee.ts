@@ -3,6 +3,16 @@ import { employees } from "../schema";
 import { and, asc, count, eq, isNull } from "drizzle-orm";
 import type { EmployeeData } from "@/types/employeeTypes";
 
+export async function deleteEmployee(id: number) {
+  return db
+    .delete(employees)
+    .where(eq(employees.id, id))
+    .returning({
+      id: employees.id,
+      teamId: employees.teamId,
+    });
+}
+
 export async function getEmployeeById(id: number) {
   return db.query.employees.findFirst({
     where: eq(employees.id, id),
