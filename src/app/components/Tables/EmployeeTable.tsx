@@ -29,7 +29,7 @@ export function EmployeeTable({
             <th className="px-3 py-2">Adres e-mail</th>
             <th className="px-3 py-2">Rola</th>
             {canEdit && <th className="px-3 py-2">Edycja</th>}
-            {canDelete && <th className="px-3 py-2">Usuwanie konta</th>}
+            {canDelete && <th className="px-3 py-2">Usuwanie</th>}
             {teamId !== undefined && (
               <th className="px-3 py-2">Wypisanie z zespołu</th>
             )}

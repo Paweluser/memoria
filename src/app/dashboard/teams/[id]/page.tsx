@@ -3,6 +3,7 @@ import { AppLink } from "@/app/components/AppLink";
 import { PageHeader } from "@/app/components/DashboardLayout/PageHeader";
 import { EmployeeTable } from "@/app/components/Tables/EmployeeTable";
 import { AssignEmployeeForm } from "@/app/components/Form/AssignEmployeeForm";
+import { DeleteTeamForm } from "@/app/components/Form/DeleteTeamForm";
 import { getTeamDetails } from "@/db/queries/team";
 import { getEmployeeList } from "@/db/queries/employee";
 import { requireUser } from "@/db/session";
@@ -43,9 +44,12 @@ export default async function TeamDetailsPage({
           Wróć do listy zespołów
         </AppLink>
         {canEditTeam && (
-          <AppLink href={`/dashboard/teams/${team.id}/edit`}>
-            Edytuj
-          </AppLink>
+          <>
+            <AppLink href={`/dashboard/teams/${team.id}/edit`}>
+              Edytuj
+            </AppLink>
+            <DeleteTeamForm teamId={team.id} />
+          </>
         )}
       </div>
 

@@ -3,7 +3,12 @@
 import { teamSchema, assignEmployeeSchema } from "@/db/validations/teamSchema";
 import { requireUser } from "@/db/session";
 import { hasRole } from "@/db/permissions";
-import { createTeamWithEmployees, getTeamById, updateTeamName } from "@/db/queries/team";
+import {
+    createTeamWithEmployees,
+    deleteTeam,
+    getTeamById,
+    updateTeamName,
+} from "@/db/queries/team";
 import { assignEmployeeToTeam, removeEmployeeFromTeam } from "@/db/queries/employee";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -21,11 +26,83 @@ type AssignEmployeeFormState = {
     };
 };
 
-type RemoveEmployeeFormState = {
+type GeneralFormState = {
     errors: {
         general?: string[];
     };
 };
+
+export async function deleteTeamAction(
+    teamId: number,
+): Promise<GeneralFormState> {
+    const session = await requireUser();
+
+    try {
+        const canDeleteTeam = await hasRole(session.userId, ["ADMIN"]);
+
+        if (!canDeleteTeam) {
+            return {
+                errors: {
+                    general: ["Nie masz uprawnień do usuwania zespołów."],
+                },
+            };
+        }
+
+        const [deletedTeam] = await deleteTeam(teamId);
+
+        if (!deletedTeam) {
+            return {
+                errors: {
+                    general: ["Zespół już nie istnieje."],
+                },
+            };
+        }
+    } catch (error) {
+        const databaseError =
+            error instanceof Error ? (error.cause ?? error) : error;
+
+        if (
+            typeof databaseError === "object" &&
+            databaseError !== null &&
+            "constraint" in databaseError
+        ) {
+            if (databaseError.constraint === "Employee_teamId_Team_id_fk") {
+                return {
+                    errors: {
+                        general: [
+                            "Nie można usunąć zespołu z przypisanymi pracownikami. Najpierw wypisz ich z zespołu.",
+                        ],
+                    },
+                };
+            }
+
+            if (databaseError.constraint === "Ceremony_teamId_Team_id_fk") {
+                return {
+                    errors: {
+                        general: [
+                            "Nie można usunąć zespołu przypisanego do pogrzebów.",
+                        ],
+                    },
+                };
+            }
+        }
+
+        console.error("Błąd podczas usuwania zespołu:", error);
+
+        return {
+            errors: {
+                general: ["Nie udało się usunąć zespołu."],
+            },
+        };
+    }
+
+    revalidatePath("/dashboard/teams");
+    revalidatePath(`/dashboard/teams/${teamId}`);
+    revalidatePath(`/dashboard/teams/${teamId}/edit`);
+    revalidatePath("/dashboard/employees/new");
+
+    redirect("/dashboard/teams");
+}
 
 export async function createTeamAction(
     prevState: TeamFormState,
@@ -212,7 +289,7 @@ export async function assignEmployeeToTeamAction(
 export async function removeEmployeeFromTeamAction(
     teamId: number,
     employeeId: number,
-): Promise<RemoveEmployeeFormState> {
+): Promise<GeneralFormState> {
     const session = await requireUser();
 
     try {

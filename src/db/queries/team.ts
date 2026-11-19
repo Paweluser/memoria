@@ -2,6 +2,13 @@ import { and, asc, count, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { teams, employees } from "@/db/schema";
 
+export async function deleteTeam(id: number) {
+  return db
+    .delete(teams)
+    .where(eq(teams.id, id))
+    .returning({ id: teams.id });
+}
+
 export async function createTeamWithEmployees(
   teamName: string,
   employeeIds: number[],
