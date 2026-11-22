@@ -23,7 +23,7 @@ export default async function FuneralsPage({ searchParams }: FuneralsPageProps) 
     <>
       <PageHeader
         title="Pogrzeby"
-        description="Zbiór wszystkich pogrzebów oraz opcja dodawania nowych pogrzebów."
+        description="Zbiór wszystkich pogrzebów oraz opcja dodawania nowych pogrzebów(Po szczegóły kliknij w dany pogrzeb)."
       />
       {canCreateFuneral && (
         <div className="flex justify-center">
