@@ -213,6 +213,7 @@ export async function updateTeamAction(
 
     revalidatePath("/dashboard/teams");
     revalidatePath(`/dashboard/teams/${teamId}`);
+    revalidatePath("/dashboard");
 
     redirect(`/dashboard/teams/${teamId}`);
 }

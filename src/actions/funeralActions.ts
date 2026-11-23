@@ -79,6 +79,7 @@ export async function deleteFuneralAction(
 
   revalidatePath("/dashboard/funerals");
   revalidatePath(`/dashboard/funerals/${funeralId}`);
+  revalidatePath("/dashboard");
   redirect("/dashboard/funerals");
 }
 
@@ -124,6 +125,9 @@ export async function createFuneralAction(data: unknown) {
       });
       
     });
+
+    revalidatePath("/dashboard/funerals");
+    revalidatePath("/dashboard");
 
     return { 
       success: true, 
