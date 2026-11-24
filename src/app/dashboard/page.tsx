@@ -5,7 +5,7 @@ import { AppLink } from "@/app/components/AppLink";
 import { getCeremoniesDashboardData } from "@/db/queries/ceremony";
 import { requireUser } from "@/db/session";
 import { formatDate } from "@/utils/formatDate";
-import { dashboardCards } from "@/constants/dashboardCards";
+import { dashboardCards } from "@/constants/DashboardCards";
 
 export default async function DashboardPage() {
   await requireUser();
