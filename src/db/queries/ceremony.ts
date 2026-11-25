@@ -1,6 +1,70 @@
-import { and, asc, count, eq, gte, isNull, lt, notExists } from "drizzle-orm";
+import { and, asc, count, eq, gte, isNull, lt, notExists, sql } from "drizzle-orm";
+import { months } from "@/constants/Months";
+import type {
+    CeremonyStatisticsTotals,
+    MonthlyCeremonyStatistics,
+} from "@/types/statisticsTypes";
 import { db } from "../index";
 import { ceremonies, clients, deceased } from "../schema";
+
+export async function getCeremonyYears() {
+    const result = await db
+        .selectDistinct({
+            year: sql`extract(year from ${ceremonies.funeralDate})`.mapWith(Number),
+        })
+        .from(ceremonies);
+
+    return result.map((row) => row.year);
+}
+
+export async function getCeremonyStatistics(year: number) {
+    const startDate = `${year}-01-01`;
+    const endDate = `${year + 1}-01-01`;
+    const monthNumber = sql`extract(month from ${ceremonies.funeralDate})`.mapWith(Number);
+
+    const result = await db
+        .select({
+            month: monthNumber,
+            burialType: ceremonies.burialType,
+            count: count(),
+        })
+        .from(ceremonies)
+        .where(
+            and(
+                gte(ceremonies.funeralDate, startDate),
+                lt(ceremonies.funeralDate, endDate),
+            ),
+        )
+        .groupBy(monthNumber, ceremonies.burialType);
+
+    const data: MonthlyCeremonyStatistics[] = months.map((month) => {
+        const coffin = result.find(
+            (row) => row.month === month.value && row.burialType === "Trumna",
+        )?.count ?? 0;
+        const urn = result.find(
+            (row) => row.month === month.value && row.burialType === "Urna",
+        )?.count ?? 0;
+
+        return {
+            month: month.value,
+            monthName: month.label,
+            total: coffin + urn,
+            coffin,
+            urn,
+        };
+    });
+
+    const totals = data.reduce<CeremonyStatisticsTotals>(
+        (sum, row) => ({
+            total: sum.total + row.total,
+            coffin: sum.coffin + row.coffin,
+            urn: sum.urn + row.urn,
+        }),
+        { total: 0, coffin: 0, urn: 0 },
+    );
+
+    return { data, totals };
+}
 
 export async function getCeremoniesDashboardData() {
     const today = new Intl.DateTimeFormat("en-CA", {
